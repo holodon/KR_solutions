@@ -192,7 +192,7 @@ int main(void) {
 	// max float:
 	float f = 1.0;
 	float last_f;
-	float step = 1.0;
+	float step = 9.0;
 	while(1) {
 		last_f = f;
 		f *= (1.0 + step);
@@ -209,15 +209,18 @@ int main(void) {
 	printf("The expected value?  : %s\n\n", (FLT_MAX == last_f)? "yes":"no");
 
 	// max double:
+	// for this one i used some help with the double precision on my machine:
+	// https://stackoverflow.com/a/45824141/6049386
 	double d = 1.0;
 	double last_d;
-	double step_d = 1.0;
+	double step_d = 9.0;
 	while(1) {
 		last_d = d;
 		d *= (1.0 + step_d);
 		while (d == INFINITY) {
 			step_d /= 2.0;
-			d  = last_d * (1.0 + step_d);
+			//d  = last_d * (1.0 + step_d);	// dangerous - not working everywhere
+			d = last_d + step_d*last_d;
 		}
 		if (! (d > last_d) )
 			break;
@@ -226,7 +229,6 @@ int main(void) {
 	printf("limits.h double max  : %e\n", DBL_MAX);
 	printf("diff                 : %e\n", DBL_MAX - last_d);
 	printf("The expected value?  : %s\n\n", (DBL_MAX == last_d)? "yes":"no");
-
 
 	return 0;
 }
