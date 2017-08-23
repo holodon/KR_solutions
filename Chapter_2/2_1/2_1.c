@@ -219,7 +219,7 @@ int main(void) {
 		d *= (1.0 + step_d);
 		while (d == INFINITY) {
 			step_d /= 2.0;
-			//d  = last_d * (1.0 + step_d);	// dangerous - not working everywhere
+			//d  = last_d * (1.0 + step_d);	// this one may not work everywhere
 			d = last_d + step_d*last_d;
 		}
 		if (! (d > last_d) )
