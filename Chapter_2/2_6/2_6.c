@@ -15,8 +15,10 @@ int main(void)
 	int p, n;
 	x = 0b11111111;
 	y = 0b10101000;
+    p = 4;
+    n = 2;
 
-	int res = setbits(x, 4, 2, y);
+	int res = setbits(x, p, n, y);
 
 	printBits(sizeof(res), &res);
 	return 0;
