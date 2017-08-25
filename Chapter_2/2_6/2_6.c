@@ -26,7 +26,7 @@ int main(void)
 
 int setbits(unsigned x, int p, int n, unsigned y)
 {
-		// mask x         wide enough mask like 11110011    last n bits from y shifted to p like 0000xx00
+		// mask x          wide enough mask like 11110011    last n bits from y shifted to p like 0000xx00
 	return x     &    (~0 << (p + 1) | ~(~0 << (p - n + 1)))   |   ((~(~0 << n) & y) << (p - n + 1));
 }
 
@@ -38,9 +38,9 @@ void printBits(size_t const size, void const * const ptr)
     unsigned char byte;
     int i, j;
 
-    for (i=size-1;i>=0;i--)
+    for (i = size - 1; i >= 0; i--)
     {
-        for (j=7;j>=0;j--)
+        for (j = 7; j >= 0; j--)
         {
             byte = (b[i] >> j) & 1;
             printf("%u", byte);
