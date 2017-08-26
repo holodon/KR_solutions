@@ -1,7 +1,8 @@
 /*
 Exercise 1-24. Write a program to check a C program for rudimentary syntax errors like
 unmatched parentheses, brackets and braces. Don't forget about quotes, both single and
-double, escape sequences, and comments. (This program is hard if you do it in fulLine generality.)
+double, escape sequences, and comments. (This program is hard if you do it in full
+generality.)
 
 Build on top of 1_23 - a state machine for skipping quotes and special symbols.
 */
@@ -188,7 +189,8 @@ void parseList()
 		return;
 
 	if (pos == 1) {								// list with only one element
-		printf("Unmatched %c at line %d col %d\n", list[0][lType], list[0][lLine], list[0][lCol]);
+		printf("Unmatched %c at line %d col %d\n", 
+			list[0][lType], list[0][lLine], list[0][lCol]);
 		return;
 	}
 
@@ -218,7 +220,8 @@ void parseList()
 			list [last][lNext] = list [list[pos][lNext]] [lNext];
 		}
 
-		last = pos;								// save the current (last) position and advance
+		last = pos;								/* save the current (last) position 
+												 and advance */
 
 		if (list [pos][lNext] == -1) {			// end of list reached - start over
 			pos = head;
@@ -235,7 +238,8 @@ void parseList()
 												// print all errors
 	pos = head;
 	while (1) {
-		printf("Unmatched %c at line %d col %d\n", list[pos][lType], list[pos][lLine], list[pos][lCol]);
+		printf("Unmatched %c at line %d col %d\n", 
+			list[pos][lType], list[pos][lLine], list[pos][lCol]);
 		if (list [pos] [lNext] == -1) {
 			break;
 		}

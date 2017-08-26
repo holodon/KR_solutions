@@ -1,3 +1,9 @@
+/*
+Exercise 1-18. Write a program to remove trailing blanks
+and tabs from each line of input, and to delete entirely 
+blank lines.
+*/
+
 #include <stdio.h>
 #define MAXLINE 1000 /* maximum input line length */
 #define FALSE 0
@@ -41,7 +47,8 @@ int getLine(char s[], int lim)
 	return i;
 }
 
-/* strips all spaces, tabs and more than one '\n' from the end of the string */
+/* strips all spaces, tabs and more than one '\n' 
+ from the end of the string */
 int strip(char s[], int len)
 {
 	if (len == 1 && s[0] == '\n')
