@@ -99,9 +99,17 @@ int getop(char s[])
     while ((s[0] = c = getch()) == ' ' || c == '\t')
         ;
     s[1] = '\0';
-    if (!isdigit(c) && c != '.')
+    if (!isdigit(c) && c != '.' && c != '-')
         return c;       /* not a number */
     i = 0;
+    if (c == '-')       /* '-' followed by number? */
+        if (!isdigit(s[1] = c = getch())) {
+            ungetch(c);
+            s[1] = '\0';
+            return '-';
+        }
+        else
+            i = 1;
     if (isdigit(c))     /* collect integer part */
         while (isdigit(s[++i] = c = getch()))
             ;
