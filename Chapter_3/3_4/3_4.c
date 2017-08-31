@@ -27,7 +27,7 @@ int main(void)
     printf("int   : %d\n", n);
 
     itoa(n, s);
-    printf("string: %s\n",s);
+    printf("string: %s\n", s);
 
     return 0;
 }

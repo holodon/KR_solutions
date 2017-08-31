@@ -1,14 +1,15 @@
 /*
-Exercise 2-9. In a two's complement number system, x &= (x-1) deletes the rightmost 1-bit
-in x . Explain why. Use this observation to write a faster version of bitcount .
+Exercise 2-9. In a two's complement number system, x &= (x-1) deletes the 
+rightmost 1-bit in x . Explain why. Use this observation to write a faster 
+version of bitcount .
 
 when x is for example:
 	10101010	or  other example 10101111
 then x-1 looks like
 	10101001	or                10101110
-or we could say the (x-1) operation moves the right most '1' one bit to the right
-then if we compute x &= (x-1) everything is the same except the last '1' and the 
-following '0' which gets 'removed'
+or we could say the (x-1) operation moves the right most '1' one bit to the 
+right then if we compute x &= (x-1) everything is the same except the last '1'
+and the following '0' which gets 'removed'
 */
 
 #include <stdio.h>
