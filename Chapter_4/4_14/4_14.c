@@ -5,7 +5,7 @@ type t. (Block structure will help.)
 
 #include <stdio.h>
 
-#define swap(t,x,y) do {t = x; x = y; y = t;} while (0);
+#define swap(t,x,y) do {t = x; x = y; y = t;} while (0)
 
 int main(void)
 {
