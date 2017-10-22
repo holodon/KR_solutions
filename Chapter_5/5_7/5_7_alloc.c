@@ -1,18 +1,11 @@
-/*
-Exercise 5-7. Rewrite readlines to store lines in an array supplied by main , 
-rather than calling alloc to maintain storage. How much faster is the program?
-*/
-
 #include <stdio.h>
 #include <string.h>
 
 #define MAXLINES 5000               /* max #lines to be sorted */
-#define MAXLEN 1000                 /* max length of any input line */
-#define MAXSIZE 10000               /* MAXLINES * MAXLEN */
 
 char *lineptr[MAXLINES];            /* pointers to text lines */
 
-int readlines(char *lineptr[], int nlines, char storage[]);
+int readlines(char *lineptr[], int nlines);
 void writelines(char *lineptr[], int nlines);
 
 void qsort(char *lineptr[], int left, int right);
@@ -20,10 +13,8 @@ void qsort(char *lineptr[], int left, int right);
 /* sort input lines */
 int main(void)
 {
-    char storage[MAXSIZE];          /* big enough array */
-
     int nlines;                     /* number of input lines read */
-    if ((nlines = readlines(lineptr, MAXLINES, storage)) >= 0) {
+    if ((nlines = readlines(lineptr, MAXLINES)) >= 0) {
         int i;
         qsort(lineptr, 0, nlines-1);
         writelines(lineptr, nlines);
@@ -36,28 +27,47 @@ int main(void)
     return 0;
 }
 
+#define MAXLEN 1000                 /* max length of any input line */
 int mgetline(char *s, int lim);
+char *alloc(int);
 
 /* readlines: read input lines */
-int readlines(char *lineptr[], int maxlines, char storage[])
+int readlines(char *lineptr[], int maxlines)
 {
-
-    int len, nlines, currpos, start;
-    nlines = currpos = start = 0;
-
-    while ((len = mgetline(&storage[currpos], MAXLEN)) > 0) {
-        currpos += len;
-        if (nlines >= maxlines || currpos == MAXSIZE)
+    int len, nlines;
+    char *p, line[MAXLEN];
+    nlines = 0;
+    while ((len = mgetline(line, MAXLEN)) > 0)
+        if (nlines >= maxlines || (p = alloc(len)) == NULL)
             return -1;
         else {
-            /* delete newline */
-            storage[currpos - 1] = '\0';
-            lineptr[nlines++] = &storage[start];
-            start = currpos;
+            line[len-1] = '\0';     /* delete newline */
+            strcpy(p, line);
+            lineptr[nlines++] = p;
         }
-    }
 
     return nlines;
+}
+
+#define ALLOCSIZE 10000             /* size of available space */
+static char allocbuf[ALLOCSIZE];    /* storage for alloc */
+static char *allocp = allocbuf;     /* next free position */
+
+/* return pointer to n characters */
+char *alloc(int n)
+{
+    if (allocbuf + ALLOCSIZE - allocp >= n) { /* it fits */
+        allocp += n;
+        return allocp - n;          /* old p */
+    } else                          /* not enough room */
+        return 0;
+}
+
+/* free storage pointed to by p */
+void afree(char *p)
+{
+    if (p >= allocbuf && p < allocbuf + ALLOCSIZE)
+        allocp = p;
 }
 
 /* writelines: write output lines */

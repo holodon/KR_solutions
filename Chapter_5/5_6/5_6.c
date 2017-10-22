@@ -91,8 +91,8 @@ int mgetline(char *s, int lim)
         s++;
         i++;
     }
-    if (c == '\n') {
-        *s++ = c;
+    if (*s == '\n') {
+        s++;
         i++;
     }
     *s = '\0';
