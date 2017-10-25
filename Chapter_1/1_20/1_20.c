@@ -3,6 +3,8 @@ Exercise 1-20. Write a program detab that replaces tabs in the
 input with the proper number of blanks to space to the next 
 tab stop. Assume a fixed set of tab stops, say every n columns.
 Should n be a variable or a symbolic parameter?
+
+when testing do not forget to set your ide's tab width settings properly!
 */
 
 #include <stdio.h>

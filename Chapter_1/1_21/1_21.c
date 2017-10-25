@@ -4,6 +4,8 @@ by the minimum number of tabs and blanks to achieve the same spacing.
 Use the same tab stops as for detab . When either a tab or a single 
 blank would suffice to reach a tab stop, which should be given
 preference?
+
+when testing do not forget to set your ide's tab width settings properly!
 */
 
 #include <stdio.h>
