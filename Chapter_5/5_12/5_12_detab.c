@@ -66,14 +66,15 @@ int main(int argc, char *argv[])
             arg = (tabStops == -1)? 1:5;
         } else if (c == '\t') {
             for (i = 0; i < (currtab - col); i++) {
-                putchar(' ');
-                //putchar('_');           // for testing
+                //putchar(' ');
+                putchar('_');           // for testing
             }
             allCols++;
             currtab = getnewtab();
             col = 0;
         } else {
-            putchar(c);
+            //putchar(c);
+            putchar('0');
             col++;
             allCols++;
             if (col == currtab) {
