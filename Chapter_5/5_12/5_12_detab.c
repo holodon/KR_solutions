@@ -24,6 +24,9 @@ int currErr = -1;
 int arg = 1;            // argument counter
 int deftab = 8;         // default tab size
 
+int debug[100];
+int currdebug = 0;
+
 int getnewtab(void);
 
 int main(int argc, char *argv[])
@@ -66,6 +69,7 @@ int main(int argc, char *argv[])
                 putchar(' ');
                 //putchar('_');           // for testing
             }
+            allCols++;
             currtab = getnewtab();
             col = 0;
         } else {
@@ -86,6 +90,12 @@ int main(int argc, char *argv[])
                 argv[errors[i]], deftab);
     }
 
+
+    printf("\n");
+    for (i = 0; i < currdebug; i++) {
+        printf("debug %i: %i\n", i, debug[i]);
+    }
+
     printf("\n\ndone\n");
     return 0;
 }
@@ -101,19 +111,18 @@ void countErrors(int ar) {
 // returns the next tab size
 int getnewtab(void)
 {
-    int currtab;
+    int currtab = deftab;
 
     if (startAt > 0 && tabStops > 0 && allCols >= startAt)
         currtab = tabStops;
-    else {
-        if (arg < margc)
-            if ((currtab = atoi(margv[arg])) <= 0) {
-                currtab = deftab;
-                countErrors(arg);
-            }
+    else if ((arg < margc) && ((currtab = atoi(margv[arg])) <= 0)) {
+        currtab = deftab;
+        countErrors(arg);
     }
 
     arg++;
+
+    debug[currdebug++] = currtab;
 
     return currtab;
 }
