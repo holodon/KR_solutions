@@ -8,7 +8,7 @@ rather than calling alloc to maintain storage. How much faster is the program?
 
 #define MAXLINES 5000               /* max #lines to be sorted */
 #define MAXLEN 1000                 /* max length of any input line */
-#define MAXSIZE 10000               /* MAXLINES * MAXLEN */
+#define MAXSIZE 10000               /* max size of the buffer */
 
 char *lineptr[MAXLINES];            /* pointers to text lines */
 
@@ -24,7 +24,6 @@ int main(void)
 
     int nlines;                     /* number of input lines read */
     if ((nlines = readlines(lineptr, MAXLINES, storage)) >= 0) {
-        int i;
         qsort(lineptr, 0, nlines-1);
         writelines(lineptr, nlines);
         return 0;
@@ -45,9 +44,9 @@ int readlines(char *lineptr[], int maxlines, char storage[])
     int len, nlines, currpos, start;
     nlines = currpos = start = 0;
 
-    while ((len = mgetline(&storage[currpos], MAXLEN)) > 0) {
+    while ( (len = mgetline(&storage[currpos], MAXLEN)) > 0 ) {
         currpos += len;
-        if (nlines >= maxlines || currpos == MAXSIZE)
+        if (nlines >= maxlines || currpos >= MAXSIZE)
             return -1;
         else {
             /* delete newline */
