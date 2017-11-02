@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
             putchar(c);
             col = 0;
             arg = 1;
+            sp = 0;                         // also remove trailing spaces
         } else if (c == ' ') {              // space
             sp++;
             if ((col + sp) % currtab == 0) {// tab possible?
@@ -35,23 +36,21 @@ int main(int argc, char *argv[])
                 sp = 0;
                 col = 0;
 
-            // get next tab
-            if ((arg < argc) && ((currtab = atoi(argv[arg])) > 0) )
-                ;
-            else
-                currtab = deftab;
-            arg++;
+                // get next tab
+                if ((arg < argc) && ((currtab = atoi(argv[arg])) > 0) )
+                    ;
+                else
+                    currtab = deftab;
+                arg++;
 
             }
 
         } else {                            // everything else
-            if (sp > 0) {                   // print buffered spaces if any
-                for (i = 0; i < sp; i++) {
-                    //putchar('_');           // for testing
-                    putchar(' ');
-                    col++;
-                }
-                sp = 0;
+            while (sp) {                    // print buffered spaces if any
+                //putchar('_');             // for testing
+                putchar(' ');
+                col++;
+                sp--;
             }
             putchar(c);                     // default print char
             col++;

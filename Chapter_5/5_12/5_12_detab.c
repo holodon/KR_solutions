@@ -24,9 +24,6 @@ int currErr = -1;
 int arg = 1;            // argument counter
 int deftab = 8;         // default tab size
 
-int debug[100];
-int currdebug = 0;
-
 int getnewtab(void);
 
 int main(int argc, char *argv[])
@@ -48,15 +45,17 @@ int main(int argc, char *argv[])
     } else
         arg = 5;
 
-    printf("startAt: %i\n", startAt);
-    printf("tabStops: %i\n", tabStops);
+    if (startAt != -1 && tabStops != -1) {
+        printf("startAt : %i\n", startAt);
+        printf("tabStops: %i\n", tabStops);
+    }
 
     margc = argc;
     margv = argv;
 
     int c, i;
     int col = 0;                        // column count after last tab
-    int currtab = 8;                    // default tab size
+    int currtab = getnewtab();          // tab size
 
     while((c = getchar()) != EOF) {
         if (c == '\n') {
@@ -64,17 +63,17 @@ int main(int argc, char *argv[])
             col = 0;
             allCols = 0;
             arg = (tabStops == -1)? 1:5;
+            currtab = getnewtab();
         } else if (c == '\t') {
             for (i = 0; i < (currtab - col); i++) {
-                //putchar(' ');
-                putchar('_');           // for testing
+                putchar(' ');
+                //putchar('_');           // for testing
+                allCols++;
             }
-            allCols++;
             currtab = getnewtab();
             col = 0;
         } else {
-            //putchar(c);
-            putchar('0');
+            putchar(c);
             col++;
             allCols++;
             if (col == currtab) {
@@ -89,12 +88,6 @@ int main(int argc, char *argv[])
         for (i = 0; i < currErr; i++)
             printf("Bad tab value: '%s'. Assuming default: '%i'.\n", 
                 argv[errors[i]], deftab);
-    }
-
-
-    printf("\n");
-    for (i = 0; i < currdebug; i++) {
-        printf("debug %i: %i\n", i, debug[i]);
     }
 
     printf("\n\ndone\n");
@@ -122,8 +115,6 @@ int getnewtab(void)
     }
 
     arg++;
-
-    debug[currdebug++] = currtab;
 
     return currtab;
 }
