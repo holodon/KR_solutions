@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
         error = 1;
 
     if (error) {
-        printf("Usage: %s [-n[r]]\n", argv[0]);
+        printf("Usage: %s [-nr]\n", argv[0]);
         return 1;
     }
 
