@@ -18,7 +18,8 @@ char *lineptr[MAXLINES];            /* pointers to text lines */
 int readlines(char *lineptr[], int nlines, char storage[]);
 void writelines(char *lineptr[], int nlines);
 
-void mqsort(void *lineptr[], int left, int right, int (*comp)(void *, void *));
+void mqsort(void *lineptr[], int left, int right, 
+    int (*comp)(void *, void *));
 int numcmp(char *, char *);
 
 int reverse = 1;                    /* -r flag reverse sorting [-1,+1] */
@@ -34,31 +35,28 @@ int main(int argc, char *argv[])
     int error = 0;
 
     // check arguments, set flags
-    if (argc > 2)
-        error = 1;
-    else if (argc == 2) {
-        if (*argv[1] != '-')
-            error = 1;
-        else {
-            int mlen = strlen(argv[1]) - 1;
-            if (strchr(argv[1], 'n') != NULL) {
-                numeric = 1;
-                mlen--;
+    char **args = argv;
+    int c;
+    while(--argc > 0 && (*++args)[0] == '-')
+        while(c = *++args[0])
+            switch(c)
+            {
+                case 'f':
+                    ignorecase = 1;
+                    break;
+                case 'r':
+                    reverse = -1;
+                    break;
+                case 'n':
+                    numeric = 1;
+                    break;
+                default:
+                    printf("%s: illegal option %c\n", argv[0], c);
+                    argc = 0;
+                    break;
             }
-            if (strchr(argv[1], 'r') != NULL) {
-                reverse = -1;
-                mlen--;
-            }
-            if (strchr(argv[1], 'f') != NULL) {
-                ignorecase = 1;
-                mlen--;
-            }
-            if (mlen)
-                error = 1;
-        }
-    }
 
-    if (error) {
+    if (argc) {
         printf("Usage: %s [-nrf]\n", argv[0]);
         return 1;
     }

@@ -16,7 +16,8 @@ char *lineptr[MAXLINES];            /* pointers to text lines */
 int readlines(char *lineptr[], int nlines, char storage[]);
 void writelines(char *lineptr[], int nlines);
 
-void mqsort(void *lineptr[], int left, int right, int (*comp)(void *, void *));
+void mqsort(void *lineptr[], int left, int right, 
+    int (*comp)(void *, void *));
 int numcmp(char *, char *);
 
 int reverse = 1;                    /* -r flag reverse sorting [-1,+1] */
