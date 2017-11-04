@@ -3,6 +3,10 @@ Exercise 5-17. Add a field-searching capability, so sorting may bee done on
 fields within lines, each field sorted according to an independent set of 
 options. (The index for this book was sorted with -df for the index category 
 and -n for the page numbers.)
+
+**For me it was not clear enough what the authors mean with "field-searching",
+so I took the common assumption that the fields are set with absolute
+start/stop column values
 */
 
 #include <stdio.h>
