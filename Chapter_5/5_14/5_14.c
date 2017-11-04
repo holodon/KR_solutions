@@ -29,28 +29,26 @@ int main(int argc, char *argv[])
     int nlines;                     /* number of input lines read */
     int numeric = 0;                /* 1 if numeric sort */
 
-    int error = 0;
-
     // check arguments, set flags
-    if (argc == 2) {
-        if ( strcmp(argv[1], "-n") == 0 )
-            numeric = 1;
-        else if ( strcmp(argv[1], "-r") == 0 )
-            reverse = -1;
-        else if ( strcmp(argv[1], "-rn") == 0 ) {
-            reverse = -1;
-            numeric = 1;
-        }
-        else if ( strcmp(argv[1], "-nr") == 0 ) {
-            reverse = -1;
-            numeric = 1;
-        }
-        else
-            error = 1;
-    } else if (argc > 2)
-        error = 1;
+    char **args = argv;
+    int c;
+    while(--argc > 0 && (*++args)[0] == '-')
+        while(c = *++args[0])
+            switch(c)
+            {
+                case 'r':
+                    reverse = -1;
+                    break;
+                case 'n':
+                    numeric = 1;
+                    break;
+                default:
+                    printf("%s: illegal option %c\n", argv[0], c);
+                    argc = 0;
+                    break;
+            }
 
-    if (error) {
+    if (argc) {
         printf("Usage: %s [-nr]\n", argv[0]);
         return 1;
     }

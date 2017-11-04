@@ -25,7 +25,7 @@ int numcmp(char *, char *);
 int dircmp(char *, char *);
 
 int reverse = 1;                    /* -r flag reverse sorting [-1,+1] */
-int ignorecase = 0;             /* 1 if ignoring case */
+int ignorecase = 0;                 /* 1 if ignoring case */
 int dirorder = 0;                   /* 1 if sort by directory order */
 
 /* sort input lines */
