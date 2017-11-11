@@ -1,5 +1,7 @@
 /*
 Exercise 5-18. Make dcl recover from input errors.
+
+THIS IS WIP - STILL NOT WORKING
 */
 
 #include <stdio.h>
