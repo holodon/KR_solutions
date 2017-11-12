@@ -1,7 +1,12 @@
 /*
 Exercise 5-18. Make dcl recover from input errors.
 
-THIS IS WIP - STILL NOT WORKING
+error recovery from:
+    - repeated names
+    - malformed input
+    - empty lines
+    - more spaces
+    - possible SEGV by getting the brackets
 */
 
 #include <stdio.h>
@@ -12,26 +17,36 @@ enum { NAME, PARENS, BRACKETS };
 void dcl(void);
 void dirdcl(void);
 int gettoken(void);
+void merror(char *err);
+
 int tokentype;                  /* type of last token */
 char token[MAXTOKEN];           /* last token string */
 char name[MAXTOKEN];            /* identifier name */
 char datatype[MAXTOKEN];        /* data type = char, int, etc. */
 char out[1000];                 /* output string */
+int error = 0;
+int emptyLine = 1;              /* 1 - empty, 0 - not empty */
 
 
 /* convert declaration to words */
 int main(void)
 {
-    printf("---dcl---\n");
-    while (gettoken() != EOF) {         /* 1st token on line */
-        strcpy(datatype, token);        /* is the datatype */
-        out[0] = '\0';
+    printf("---dcl---\n\n");
 
-        dcl();                          /* parse rest of line */
+    while (gettoken() != EOF) {
+        do {
+            strcpy(datatype, token);    /* 1st token on line is the datatype */
+            out[0] = '\0';
+            dcl();                      /* parse rest of line */
+            if (tokentype != '\n') {
+                merror("expected '\\n'");
+            }
+        } while ((tokentype != '\n') && (!error));
 
-        if (tokentype != '\n')
-            printf("syntax error\n");
-        printf("%s: %s %s\n", name, out, datatype);
+        if (error)
+            error = 0;
+        else
+            printf("%s: %s %s\n", name, out, datatype);
     }
 
     printf("\n\nDone.\n");
@@ -60,13 +75,13 @@ void dirdcl(void)
         dcl();
 
         if (tokentype != ')')
-            printf("error: missing )\n");
+            merror("missing ')'");
 
-    } else if (tokentype == NAME)       /* variable name */
+    } else if (tokentype == NAME)      /* variable name */
         strcpy(name, token);
 
-    else
-        printf("error: expected name or (dcl)\n");
+    else if (!emptyLine)
+            merror("expected name or (dcl)");
 
     while ((type=gettoken()) == PARENS || type == BRACKETS)
         if (type == PARENS)
@@ -83,11 +98,14 @@ int gettoken(void)
 {
     int c, getch(void);
     void ungetch(int);
+    int skipspace();
     char *p = token;
-    while ((c = getch()) == ' ' || c == '\t')
-        ;
+    c = skipspace();
+    if (c != '\n')                      /* deal with empty lines */
+        emptyLine = 0;
     if (c == '(') {
-        if ((c = getch()) == ')') {
+        c = skipspace();                /* to deal with (   ) */
+        if (c == ')') {
             strcpy(token, "()");
             return tokentype = PARENS;
         } else {
@@ -95,9 +113,14 @@ int gettoken(void)
             return tokentype = '(';
         }
     } else if (c == '[') {
-        for (*p++ = c; (*p++ = getch()) != ']'; )
-            ;
-        *p = '\0';
+        for (*p++ = c; (*p = getch()) != ']'; )
+
+            /* line break || possible SEGV */
+            if ((*p == '\n') || (! *++p)) {
+                merror("expected ']'");
+                break;
+            }
+        *++p = '\0';
         return tokentype = BRACKETS;
     } else if (isalpha(c)) {
         for (*p++ = c; isalnum(c = getch()); )
@@ -114,13 +137,11 @@ int gettoken(void)
 char buf[BUFSIZE];      /* buffer for ungetch */
 int bufp = 0;           /* next free position in buf */
 
-
 /* get a (possibly pushed-back) character */
 int getch(void)
 {
     return (bufp > 0) ? buf[--bufp] : getchar();
 }
-
 
 /* push character back on input */
 void ungetch(int c)
@@ -132,4 +153,22 @@ void ungetch(int c)
         printf("ungetch: too many characters\n");
     else
         buf[bufp++] = c;
+}
+
+/* indicate that previous token is available in case of error */
+void merror(char *err)
+{
+    printf(" /!/ error: %s\n", err);
+    error = 1;
+}
+
+/* skip spaces, tabs and empty lines */
+int skipspace()
+{
+    int c;
+    while ((c = getch()) == ' ' || c == '\t' || ((c == '\n') && (emptyLine)) )
+        ;
+    if (c == '\n')      /* the end of a non-empty line */
+        emptyLine = 1;  /* start the new line assuming empty */
+    return c;
 }
