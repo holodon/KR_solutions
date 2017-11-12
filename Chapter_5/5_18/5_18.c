@@ -6,7 +6,7 @@ error recovery from:
     - malformed input
     - empty lines
     - more spaces
-    - possible SEGV by getting the brackets
+    - possible SEGV when getting the brackets
 */
 
 #include <stdio.h>
@@ -155,7 +155,7 @@ void ungetch(int c)
         buf[bufp++] = c;
 }
 
-/* indicate that previous token is available in case of error */
+/* error handler */
 void merror(char *err)
 {
     printf(" /!/ error: %s\n", err);
@@ -168,7 +168,7 @@ int skipspace()
     int c;
     while ((c = getch()) == ' ' || c == '\t' || ((c == '\n') && (emptyLine)) )
         ;
-    if (c == '\n')      /* the end of a non-empty line */
-        emptyLine = 1;  /* start the new line assuming empty */
+    if (c == '\n')          /* the end of a non-empty line */
+        emptyLine = 1;      /* start the new line assuming empty */
     return c;
 }
