@@ -4,7 +4,9 @@ qualifiers like const , and so on.
 
 - added some error checking based on 5_18
 
-WIP
+- this solution uses some code (logic) from "The C Answer Book"
+
+- WIP, not yet working
 */
 
 #include <stdio.h>
@@ -12,10 +14,14 @@ WIP
 #include <ctype.h>
 #define MAXTOKEN 100
 enum { NAME, PARENS, BRACKETS };
+void parseParms(void);
+void getPar(void);
 void dcl(void);
 void dirdcl(void);
 int gettoken(void);
 void merror(char *err);
+int typespec(void);
+int typequal(void);
 
 int tokentype;                  /* type of last token */
 char token[MAXTOKEN];           /* last token string */
@@ -24,6 +30,7 @@ char datatype[MAXTOKEN];        /* data type = char, int, etc. */
 char out[1000];                 /* output string */
 int error = 0;
 int emptyLine = 1;              /* 1 - empty, 0 - not empty */
+int prevToken = 0;
 
 
 /* convert declaration to words */
@@ -81,9 +88,14 @@ void dirdcl(void)
     else if (!emptyLine)
             merror("expected name or (dcl)");
 
-    while ((type=gettoken()) == PARENS || type == BRACKETS)
+    while ((type=gettoken()) == PARENS || type == BRACKETS || type == ')')
         if (type == PARENS)
             strcat(out, " function returning");
+        else if (type == ')') {
+            strcat(out, " function expecting");
+            parseParms();
+            strcat(out, " and returning");
+        }
         else {
             strcat(out, " array");
             strcat(out, token);
@@ -98,6 +110,12 @@ int gettoken(void)
     void ungetch(int);
     int skipspace();
     char *p = token;
+
+    if (prevToken) {
+        prevToken = 0;
+        return tokentype;
+    }
+
     c = skipspace();
     if (c != '\n')                      /* deal with empty lines */
         emptyLine = 0;
@@ -169,4 +187,81 @@ int skipspace()
     if (c == '\n')          /* the end of a non-empty line */
         emptyLine = 1;      /* start the new line assuming empty */
     return c;
+}
+
+/* parse the parameters */
+void parseParms(void)
+{
+    do {
+        getPar();
+    } while (tokentype == ',');
+
+    if (tokentype != ')')
+        merror("missing ')' in parameter declaration");
+}
+
+/* get a single parameter */
+void getPar(void)
+{
+    char temp[MAXTOKEN];
+
+    temp[0] = '\0';
+    gettoken();
+    int c;
+    do {
+        c = 0;
+        if (tokentype != NAME) {
+            prevToken = 1;
+            dcl();
+        } else if (typespec() == 1) {
+            c = 1;
+        } else if (typequal() == 1) {
+            c = 1;
+        } else
+            merror("unknown parameter");
+        if (c) {
+            strcat(temp, " ");
+            strcat(temp, token);
+            gettoken();
+        }
+    } while ((tokentype != ',') && (tokentype != ')'));
+
+    strcat(out, temp);
+    if (tokentype == ',')
+        strcat(out, ",");
+}
+
+/* return 1 if token is type-specifier */
+int typespec(void)
+{
+    const char *types[] = {
+        "char",
+        "int",
+        "void"
+    };
+    const char typesL = 3;
+
+    int i;
+    for (i = 0; i < typesL; i++)
+        if (strcmp(types[i], token))
+            return 1;
+
+    return 0;
+}
+
+/* return 1 if token is type-qualifier */
+int typequal(void)
+{
+    const char *typeq[] = {
+        "const",
+        "volatile"
+    };
+    const char typeqL = 2;
+
+    int i;
+    for (i = 0; i < typeqL; i++)
+        if (strcmp(typeq[i], token))
+            return 1;
+
+    return 0;
 }
