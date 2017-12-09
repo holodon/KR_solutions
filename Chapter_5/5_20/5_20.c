@@ -7,7 +7,9 @@ qualifiers like const , and so on.
 Note: This solution is not purely mine - I borrowed some logic/code from
 "The C Answer book"
 
-WIP - still not working
+WIP - still not working. Although the exercise may not be -that- hard, I am
+struggling to get it all working together with error checking and everything
+from 5_18
 */
 
 #include <stdio.h>
