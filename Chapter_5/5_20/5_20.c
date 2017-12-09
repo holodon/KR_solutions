@@ -9,8 +9,6 @@ Note: This solution is not purely mine - I borrowed some logic/code from
 
 For comparison with the solution from "The C Answer Book" refer to
 the subfolder "other solution"
-
-WIP: still not fully functional (pointers as parameter confuse it)
 */
 
 #include <stdio.h>
@@ -91,7 +89,7 @@ void dirdcl(void)
 
     } else if (tokentype == NAME)      /* variable name */
         strcpy(name, token);
-    else if (!emptyLine && tokentype != '*')
+    else if (!emptyLine && tokentype != ')')
             merror("expected name or (dcl)");
     else
         prevToken = 1;
