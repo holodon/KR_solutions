@@ -10,7 +10,7 @@ Note: This solution is not purely mine - I borrowed some logic/code from
 For comparison with the solution from "The C Answer Book" refer to
 the subfolder "other solution"
 
-WIP: still not fully functional
+WIP: still not fully functional (pointers as parameter confuse it)
 */
 
 #include <stdio.h>
