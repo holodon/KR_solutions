@@ -2,14 +2,15 @@
 Exercise 5-20. Expand dcl to handle declarations with function argument types,
 qualifiers like const , and so on.
 
-- based on 5_18
+- based on 5_18 (added error handling)
 
 Note: This solution is not purely mine - I borrowed some logic/code from
 "The C Answer book"
 
-WIP - still not working. Although the exercise may not be -that- hard, I am
-struggling to get it all working together with error checking and everything
-from 5_18
+For comparison with the solution from "The C Answer Book" refer to
+the subfolder "other solution"
+
+WIP: still not fully functional
 */
 
 #include <stdio.h>
@@ -218,6 +219,7 @@ void dclspec(void)
     char temp[MAXTOKEN];            /* string buffer */
 
     temp[0] = '\0';                 /* start with an empty string */
+    gettoken();
     do {
         if (tokentype != NAME) {
             prevToken = 1;

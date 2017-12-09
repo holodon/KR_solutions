@@ -1,3 +1,5 @@
 int func()
 
-int myfunc(char, int)
+void myfunc(char, int)
+
+char test(int *)
