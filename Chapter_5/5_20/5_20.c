@@ -91,7 +91,7 @@ void dirdcl(void)
 
     } else if (tokentype == NAME)      /* variable name */
         strcpy(name, token);
-    else if (!emptyLine)
+    else if (!emptyLine && tokentype != '*')
             merror("expected name or (dcl)");
     else
         prevToken = 1;
@@ -189,6 +189,7 @@ void ungetch(int c)
 void merror(char *err)
 {
     printf(" /!/ (line %i) error: %s\n", currLine, err);
+    prevToken = 1;
     error = 1;
 }
 
