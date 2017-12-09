@@ -1,13 +1,18 @@
-void *comp()
-
-void * comp ( ) 
+int func(char   ,     char    )
 
 
 
-int i[2
 
-./][
 
-char *t[8]
+[]void  int**
 
-char t(int)
+void myfunc(char, int)
+
+char test(int *,
+
+,,**
+
+
+*dcl* should parse [exactly] three (corectly typed) functions: "func", "myfunc" and "fff"
+
+int *fff(const int, char *)

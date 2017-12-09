@@ -2,13 +2,16 @@
 Exercise 5-20. Expand dcl to handle declarations with function argument types,
 qualifiers like const , and so on.
 
-- based on 5_18 (added error handling)
+- based on 5_18 (added error handling and recovery)
 
-Note: This solution is not purely mine - I borrowed some logic/code from
+- Note: This solution is not purely mine - I borrowed some logic/code from
 "The C Answer book"
 
-For comparison with the solution from "The C Answer Book" refer to
+- For comparison with the solution from "The C Answer Book" refer to
 the subfolder "other solution"
+
+- test it like this:
+    cat test | ./a.out
 */
 
 #include <stdio.h>
@@ -20,6 +23,9 @@ void dcl(void);
 void dirdcl(void);
 int gettoken(void);
 void merror(char *err);
+int getch(void);
+void ungetch(int);
+int skipspace(void);
 
 void dclspec(void);
 void paramdcl(void);
@@ -32,10 +38,8 @@ char name[MAXTOKEN];                    /* identifier name */
 char datatype[MAXTOKEN];                /* data type = char, int, etc. */
 char out[1000];                         /* output string */
 int error = 0;
-int emptyLine = 1;                      /* 1 - empty, 0 - not empty */
 int currLine = 1;                       /* line counter */
 int prevToken = 0;                      /* token already available */
-
 
 /* convert declaration to words */
 int main(void)
@@ -52,13 +56,14 @@ int main(void)
             }
         } while ((tokentype != '\n') && (!error));
 
-        if (error)
+        if (error || (name[0] == '\0'))
             error = 0;
         else
-            printf("%s: %s %s\n", name, out, datatype);
+            printf("\n*** %s: %s %s\n\n", name, out, datatype);
+        name[0] = '\0';
     }
 
-    printf("\n\nDone.\n");
+    printf("Done.\n\n");
     return 0;
 }
 
@@ -83,18 +88,15 @@ void dirdcl(void)
 
         dcl();
 
-        printf("tokentype: %i\n", tokentype);
         if (tokentype != ')')
             merror("missing ')'");
 
-    } else if (tokentype == NAME)      /* variable name */
+    } else if (tokentype == NAME)       /* variable name */
         strcpy(name, token);
-    else if (!emptyLine && tokentype != ')')
-            merror("expected name or (dcl)");
     else
         prevToken = 1;
 
-    while ((type=gettoken()) == PARENS || type == BRACKETS || type == '(')
+    while ((type=gettoken()) == PARENS || type == BRACKETS || type == '(') {
         if (type == PARENS)
             strcat(out, " function returning");
         else if (type == '(') {
@@ -107,14 +109,13 @@ void dirdcl(void)
             strcat(out, token);
             strcat(out, " of");
         }
+    }
 }
 
 /* return next token */
 int gettoken(void)
 {
-    int c, getch(void);
-    void ungetch(int);
-    int skipspace();
+    int c;
     char *p = token;
 
     if (prevToken) {                    /* return the last token again */
@@ -123,8 +124,6 @@ int gettoken(void)
     }
 
     c = skipspace();
-    if (c != '\n')                      /* deal with empty lines */
-        emptyLine = 0;
     if (c == '(') {
         c = skipspace();                /* to deal with (   ) */
         if (c == ')') {
@@ -195,11 +194,16 @@ void merror(char *err)
 int skipspace()
 {
     int c;
-    while ((c = getch()) == ' ' || c == '\t' || ((c == '\n') && (emptyLine)) )
+    while ((c = getch()) == ' ' || c == '\t')
         ;
-    if (c == '\n')                  /* the end of a non-empty line */
-        emptyLine = 1;              /* start the new line assuming empty */
-    return c;
+    if (c == '\n') {                /* deal with empty lines */
+        while ((c = getch()) == '\n')
+            ;
+        ungetch(c);
+        return '\n';
+    } else {
+        return c;
+    }
 }
 
 /* parse parameters between ()'s */
@@ -233,7 +237,7 @@ void dclspec(void)
             gettoken();             /* get next token */
         } else
             merror("unknown parameter");
-    } while ((tokentype != ',') && (tokentype != ')'));
+    } while ((tokentype != ',') && (tokentype != ')') && (tokentype != '\n'));
     strcat(out, temp);
     if (tokentype == ',')
         strcat(out, ",");

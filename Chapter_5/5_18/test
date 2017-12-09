@@ -1,6 +1,6 @@
-void *comp()
+char *comp()
 
-void * comp ( ) 
+int * comp ( ) 
 
 
 

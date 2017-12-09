@@ -1,7 +1,0 @@
-int func()
-
-void myfunc(char, int)
-
-char test(int *)
-
-char *fun(int, char)
