@@ -2,11 +2,12 @@
 Exercise 5-20. Expand dcl to handle declarations with function argument types,
 qualifiers like const , and so on.
 
-- added some error checking based on 5_18
+- based on 5_18
 
-- this solution uses some code (logic) from "The C Answer Book"
+Note: This solution is not purely mine - I borrowed some logic/code from
+"The C Answer book"
 
-- WIP, not yet working
+WIP - still not working
 */
 
 #include <stdio.h>
@@ -14,23 +15,25 @@ qualifiers like const , and so on.
 #include <ctype.h>
 #define MAXTOKEN 100
 enum { NAME, PARENS, BRACKETS };
-void parseParms(void);
-void getPar(void);
 void dcl(void);
 void dirdcl(void);
 int gettoken(void);
 void merror(char *err);
+
+void dclspec(void);
+void paramdcl(void);
 int typespec(void);
 int typequal(void);
 
-int tokentype;                  /* type of last token */
-char token[MAXTOKEN];           /* last token string */
-char name[MAXTOKEN];            /* identifier name */
-char datatype[MAXTOKEN];        /* data type = char, int, etc. */
-char out[1000];                 /* output string */
+int tokentype;                          /* type of last token */
+char token[MAXTOKEN];                   /* last token string */
+char name[MAXTOKEN];                    /* identifier name */
+char datatype[MAXTOKEN];                /* data type = char, int, etc. */
+char out[1000];                         /* output string */
 int error = 0;
-int emptyLine = 1;              /* 1 - empty, 0 - not empty */
-int prevToken = 0;
+int emptyLine = 1;                      /* 1 - empty, 0 - not empty */
+int currLine = 1;                       /* line counter */
+int prevToken = 0;                      /* token already available */
 
 
 /* convert declaration to words */
@@ -79,21 +82,23 @@ void dirdcl(void)
 
         dcl();
 
+        printf("tokentype: %i\n", tokentype);
         if (tokentype != ')')
             merror("missing ')'");
 
     } else if (tokentype == NAME)      /* variable name */
         strcpy(name, token);
-
     else if (!emptyLine)
             merror("expected name or (dcl)");
+    else
+        prevToken = 1;
 
-    while ((type=gettoken()) == PARENS || type == BRACKETS || type == ')')
+    while ((type=gettoken()) == PARENS || type == BRACKETS || type == '(')
         if (type == PARENS)
             strcat(out, " function returning");
-        else if (type == ')') {
-            strcat(out, " function expecting");
-            parseParms();
+        else if (type == '(') {
+            strcat(out, "function expecting");
+            paramdcl();
             strcat(out, " and returning");
         }
         else {
@@ -111,7 +116,7 @@ int gettoken(void)
     int skipspace();
     char *p = token;
 
-    if (prevToken) {
+    if (prevToken) {                    /* return the last token again */
         prevToken = 0;
         return tokentype;
     }
@@ -150,13 +155,16 @@ int gettoken(void)
 }
 
 #define BUFSIZE 100
-char buf[BUFSIZE];      /* buffer for ungetch */
-int bufp = 0;           /* next free position in buf */
+char buf[BUFSIZE];                      /* buffer for ungetch */
+int bufp = 0;                           /* next free position in buf */
 
 /* get a (possibly pushed-back) character */
 int getch(void)
 {
-    return (bufp > 0) ? buf[--bufp] : getchar();
+    int c = (bufp > 0) ? buf[--bufp] : getchar();
+    if (c == '\n')
+        currLine++;
+    return c;
 }
 
 /* push character back on input */
@@ -169,12 +177,15 @@ void ungetch(int c)
         printf("ungetch: too many characters\n");
     else
         buf[bufp++] = c;
+
+    if (c == '\n')
+        currLine--;
 }
 
 /* error handler */
 void merror(char *err)
 {
-    printf(" /!/ error: %s\n", err);
+    printf(" /!/ (line %i) error: %s\n", currLine, err);
     error = 1;
 }
 
@@ -184,54 +195,48 @@ int skipspace()
     int c;
     while ((c = getch()) == ' ' || c == '\t' || ((c == '\n') && (emptyLine)) )
         ;
-    if (c == '\n')          /* the end of a non-empty line */
-        emptyLine = 1;      /* start the new line assuming empty */
+    if (c == '\n')                  /* the end of a non-empty line */
+        emptyLine = 1;              /* start the new line assuming empty */
     return c;
 }
 
-/* parse the parameters */
-void parseParms(void)
+/* parse parameters between ()'s */
+void paramdcl(void)
 {
-    do {
-        getPar();
-    } while (tokentype == ',');
-
+    do
+        dclspec();
+    while (tokentype == ',');
     if (tokentype != ')')
-        merror("missing ')' in parameter declaration");
+        merror("missing ) in parameter declaration");
 }
 
-/* get a single parameter */
-void getPar(void)
+/* string builder for the parameters */
+void dclspec(void)
 {
-    char temp[MAXTOKEN];
+    char temp[MAXTOKEN];            /* string buffer */
 
-    temp[0] = '\0';
-    gettoken();
-    int c;
+    temp[0] = '\0';                 /* start with an empty string */
     do {
-        c = 0;
         if (tokentype != NAME) {
             prevToken = 1;
-            dcl();
-        } else if (typespec() == 1) {
-            c = 1;
-        } else if (typequal() == 1) {
-            c = 1;
-        } else
-            merror("unknown parameter");
-        if (c) {
+            dcl();                  /* parse declarator */
+        } else if (typespec()) {
             strcat(temp, " ");
             strcat(temp, token);
-            gettoken();
-        }
+            gettoken();             /* get next token */
+        } else if (typequal()) {
+            strcat(temp, " ");
+            strcat(temp, token);
+            gettoken();             /* get next token */
+        } else
+            merror("unknown parameter");
     } while ((tokentype != ',') && (tokentype != ')'));
-
     strcat(out, temp);
     if (tokentype == ',')
         strcat(out, ",");
 }
 
-/* return 1 if token is type-specifier */
+/* return 1 if the token is a type-specifier */
 int typespec(void)
 {
     const char *types[] = {
@@ -249,7 +254,7 @@ int typespec(void)
     return 0;
 }
 
-/* return 1 if token is type-qualifier */
+/* return 1 if the token is a type-qualifier */
 int typequal(void)
 {
     const char *typeq[] = {

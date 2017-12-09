@@ -7,6 +7,7 @@ error recovery from:
     - empty lines
     - more spaces
     - possible SEGV when getting the brackets
+also show the line numbers where errors are found
 */
 
 #include <stdio.h>
@@ -26,6 +27,7 @@ char datatype[MAXTOKEN];        /* data type = char, int, etc. */
 char out[1000];                 /* output string */
 int error = 0;
 int emptyLine = 1;              /* 1 - empty, 0 - not empty */
+int currLine = 1;               /* line counter */
 
 
 /* convert declaration to words */
@@ -140,7 +142,10 @@ int bufp = 0;           /* next free position in buf */
 /* get a (possibly pushed-back) character */
 int getch(void)
 {
-    return (bufp > 0) ? buf[--bufp] : getchar();
+    int c = (bufp > 0) ? buf[--bufp] : getchar();
+    if (c == '\n')
+        currLine++;
+    return c;
 }
 
 /* push character back on input */
@@ -153,12 +158,15 @@ void ungetch(int c)
         printf("ungetch: too many characters\n");
     else
         buf[bufp++] = c;
+
+    if (c == '\n')
+        currLine--;
 }
 
 /* error handler */
 void merror(char *err)
 {
-    printf(" /!/ error: %s\n", err);
+    printf(" /!/ (line %i) error: %s\n", currLine, err);
     error = 1;
 }
 
