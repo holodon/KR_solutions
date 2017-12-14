@@ -34,7 +34,6 @@ struct tnode *talloc(void);
 struct lnode *lalloc(void);
 char *mstrdup(char *s);
 void freemem(struct tnode *p);
-void freell(struct lnode *l);
 void panic(const char *msg);
 int noiseword(const char *word);
 
@@ -212,7 +211,7 @@ struct lnode *lalloc(void)
 char *mstrdup(char *s)
 {
     char *p;
-    p = (char *) calloc(1, strlen(s) + 1);           /* +1 for '\0' */
+    p = (char *) malloc(strlen(s) + 1);         /* +1 for '\0' */
 
     if (p == NULL)
         panic("mstrdup");
