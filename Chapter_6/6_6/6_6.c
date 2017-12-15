@@ -3,8 +3,11 @@ Exercise 6-6. Implement a simple version of the #define processor (i.e., no
 arguments) suitable for use with C programs, based on the routines of this
 section. You may also find getch and ungetch helpful.
 
+- Tried to get as flexible as possible without overcomplicating;
+- Added some simple error checking;
+- To keep it simple - #define's in comments and strings counts too.
+
 WIP
-- #define's in comments and strings count too
 */
 
 #include <stdio.h>
@@ -23,6 +26,7 @@ struct nlist {                              /* table entry: */
 #define HASHSIZE 101
 static struct nlist *hashtab[HASHSIZE];     /* pointer table */
 
+void addchar();
 int undef(char *);
 void printtable();
 unsigned hash(char *);
@@ -34,52 +38,83 @@ void freemem();
 
 #define MAXWORD 100
 int getword(char *, int, int);
-void ungets(char *);
 
 #define GETWORD 0
 #define GETNAME 1
 #define GETDEFN 2
 #define ERR -404
+int nextchar;
 
 
 /* a #define processor */
 int main(void)
 {
-    int i;
-
-    /* insert all */
-    // for (i = 0; i < TESTS; i++)
-
-    printf("%i",EOF);
-
     char word[MAXWORD];
     int res, count = 0;
     char name[MAXWORD];
+    struct nlist *np;
     while (getword(word, MAXWORD, GETWORD) != EOF) {
         if (strcmp(word, "#define") == 0) {
+            printf("%s", word);
             count++;
             if (
                     (res = getword(word, MAXWORD, GETNAME)) != ERR &&
                     res != EOF
                 ) {
+                printf("%s", word);
+                addchar();
                 strcpy(name, word);
                 if (
                         (res = getword(word, MAXWORD, GETDEFN)) != ERR &&
                         res != EOF
-                    )
+                    ) {
+                    printf("%s", word);
+                    addchar();
                     if (!install(name, word))
                         panic("install");
+                    }
             }
+        } else if (strcmp(word, "#undef") == 0) {
+            printf("%s", word);
+            addchar();
+            if (
+                    (res = getword(word, MAXWORD, GETNAME)) != ERR &&
+                    res != EOF
+                ) {
+                if (!undef(word))
+                    panic("undef");
+                }
+        } else {
+            if ( (np = lookup(word)) != NULL )
+                printf("%s", np->defn);     /* replace */
+            else
+                printf("%s", word);         /* print */
+            }
+
+        if (res == ERR) {
+            printf("\n\n --Malformed input--\n\tExiting...\n");
+            break;
         }
-        printf("%s", word);
     }
-    printf("\n\n\"#define\" count: %i\n", count);
+
+    printf("\n\n---------------------------------\n\n");
+    printf("\"#define\" count: %i\n", count);
     printtable();
 
     /* free memory claimed by malloc */
     freemem();
 
+    printf("\nDone.\n");
     return 0;
+}
+
+/* adds the next char after reading name or defn */
+void addchar()
+{
+    if (nextchar) {
+        putchar(nextchar);
+        nextchar = 0;
+    }
 }
 
 /* remove entry from the lookup table
@@ -112,9 +147,9 @@ void printtable()
     struct nlist *np;
     for (i = 0; i < HASHSIZE; i++)
         if (hashtab[i] != NULL) {
-            printf("row %3i:", i);
+            printf("row %4i:", i);
             for (np = hashtab[i]; np != NULL; np = np->next)
-                    printf("\t%10s-> %s\n", np->name, np->defn);
+                    printf("%15s-> %s\n", np->name, np->defn);
         }
 }
 
@@ -206,28 +241,30 @@ int getword(char *word, int lim, int mode)
     char *w = word;
 
     if (mode == GETWORD)
-        while (isspace(c = getch()))            /* print whitespace */
+        while (isspace(c = getch()))        /* print whitespace */
             putchar(c);
     else
-        while ((c = getch()) == ' ')            /* print whitespace */
+        while ((c = getch()) == ' ')        /* print space */
             putchar(c);
 
     if (mode == GETDEFN) {                  /* get #define definition */
         if (c == '"') {                     /* string */
-            while ( ((c= getch()) != '"') && (c != EOF))
-            if (c == '\n') {                /* malformed string */
-                                            /* maybe return error? */
-                putchar(c);
-                break;
-            } else
-                *w++ = c;
+            *w++ = c;
+            while ( (c= getch()) != '"' )
+                if ((c == '\n') ||
+                        (c == EOF))         /* malformed string */
+                    return ERR;
+                else
+                    *w++ = c;
+            *w++ = c;                       /* closing quote */
             *w = '\0';
             return word[0];
         }
         while (c != EOF) {                  /* everything else */
             if (c == '\n') {
-                putchar(c);
-                break;
+                nextchar = c;
+                *w = '\0';
+                return word[0];
             } else
                 *w++ = c;
             c = getch();
@@ -235,16 +272,17 @@ int getword(char *word, int lim, int mode)
     } else if (mode == GETNAME) {           /* get #define name */
         if (!isalpha(c))
             return ERR;
-        while (isalpha(c) && c != EOF) {
+        *w++ = c;
+        c = getch();
+        while (isalnum(c) || c == '_') {
             *w++ = c;
             c = getch();
         }
-        if (c != ' ') {                     /* malformed name */
-            *w = '\0';
-            if (c != EOF)
-                printf("%s", w);
+        if (c != ' ')                       /* malformed name */
             return ERR;
-        }
+        nextchar = c;
+        *w = '\0';
+        return word[0];
     }
 
     /* print comments and quotes */
@@ -282,17 +320,15 @@ int getword(char *word, int lim, int mode)
     /* "normal" word */
     if ( (isalpha(c) || (c == '#') || (c == '_')) &&
             (--lim > 0) ) {
-        *w++ = c;                               /* get first character */
+        *w++ = c;                           /* get first character */
         while ( ((isalnum(c = getch())) || (c == '_')) &&
                     (--lim > 0) )
-            *w++ = c;                           /* build the whole word */
+            *w++ = c;                       /* build the whole word */
         ungetch(c);
-    }
-
-    if (c == EOF)
-        return c;                               /* EOF */
-    else
+    } else if (c != EOF)
         putchar(c);
+    else
+        return c;                           /* EOF */
 
     *w = '\0';
     return word[0];
@@ -315,14 +351,4 @@ void ungetch(int c)
         printf("ungetch: too many characters\n");
     else
         buf[bufp++] = c;
-}
-
-/* pushback whole string */
-void ungets(char *s)
-{
-    int len = strlen(s);
-    if (bufp + len >= BUFSIZE)
-        printf("buffer is almost/ full\n");
-    else while (len > 0)
-        ungetch(s[--len]);
 }
