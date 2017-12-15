@@ -1,8 +1,6 @@
 /*
 Exercise 6-5. Write a function undef that will remove a name and definition
 from the table maintained by lookup and install .
-
-WIP - not yet working
 */
 
 #include <stdio.h>
@@ -15,6 +13,8 @@ struct nlist {                              /* table entry: */
     char *defn;                             /* replacement text */
 };
 
+/* for testing with collisions */
+//#define HASHSIZE 1
 #define HASHSIZE 101
 static struct nlist *hashtab[HASHSIZE];     /* pointer table */
 
@@ -70,12 +70,14 @@ int undef(char *name)
 {
     struct nlist *np;
     struct nlist *last = NULL;
-    for (np = hashtab[hash(name)]; np != NULL; last = np, np = np->next)
+    unsigned hashval = hash(name);
+    for (np = hashtab[hashval]; np != NULL; last = np, np = np->next)
         if (strcmp(name, np->name) == 0) {  /* found */
-            printf("removing entry: \"%s\"\n", name);
-            if (last) {
+            printf("...removing entry: \"%s\"\n", name);
+            if (last)                       /* in linked list */
                 last->next = np->next;
-            }
+            else                            /* first entry on the row */
+                hashtab[hashval] = NULL;
             free((void *) np->name);
             free((void *) np->defn);
             free((void *) np);
@@ -92,9 +94,11 @@ void printtable()
     int i;
     struct nlist *np;
     for (i = 0; i < HASHSIZE; i++)
-        if (hashtab[i] != NULL)
+        if (hashtab[i] != NULL) {
+            printf("row %i:", i);
             for (np = hashtab[i]; np != NULL; np = np->next)
-                    printf(" %-10s-> %s\n", np->name, np->defn);
+                    printf("\t%-10s-> %s\n", np->name, np->defn);
+        }
 }
 
 /* hash: form hash value for string s */
@@ -161,10 +165,16 @@ void panic(const char *msg)
 void freemem()
 {
     int i;
+    struct nlist *np, *tmp;
     for (i = 0; i < HASHSIZE; i++)
         if (hashtab[i] != NULL) {
-            free(hashtab[i]->name);
-            free(hashtab[i]->defn);
-            free(hashtab[i]);
+            np = hashtab[i];
+            while(np) {
+                tmp = np;
+                np = np->next;
+                free((void *) tmp->name);
+                free((void *) tmp->defn);
+                free((void *) tmp);
+            }
         }
 }
