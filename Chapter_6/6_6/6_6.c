@@ -7,7 +7,8 @@ section. You may also find getch and ungetch helpful.
 - Added some simple error checking;
 - To keep it simple - #define's in comments and strings counts too.
 
-WIP
+Test this program against its own source,
+    or against the provided test.c (with error)
 */
 
 #include <stdio.h>
@@ -81,6 +82,8 @@ int main(void)
                     (res = getword(word, MAXWORD, GETNAME)) != ERR &&
                     res != EOF
                 ) {
+                printf("%s", word);
+                addchar();
                 if (!undef(word))
                     panic("undef");
                 }
@@ -98,7 +101,7 @@ int main(void)
     }
 
     printf("\n\n---------------------------------\n\n");
-    printf("\"#define\" count: %i\n", count);
+    printf("\"define\" count: %i\n", count);
     printtable();
 
     /* free memory claimed by malloc */
@@ -240,12 +243,11 @@ int getword(char *word, int lim, int mode)
     void ungetch(int);
     char *w = word;
 
-    if (mode == GETWORD)
+    if (mode != GETDEFN)
         while (isspace(c = getch()))        /* print whitespace */
             putchar(c);
     else
-        while ((c = getch()) == ' ')        /* print space */
-            putchar(c);
+        c = getch();
 
     if (mode == GETDEFN) {                  /* get #define definition */
         if (c == '"') {                     /* string */
@@ -269,7 +271,7 @@ int getword(char *word, int lim, int mode)
                 *w++ = c;
             c = getch();
         }
-    } else if (mode == GETNAME) {           /* get #define name */
+    } else if (mode == GETNAME) {           /* get define name */
         if (!isalpha(c))
             return ERR;
         *w++ = c;
@@ -278,7 +280,7 @@ int getword(char *word, int lim, int mode)
             *w++ = c;
             c = getch();
         }
-        if (c != ' ')                       /* malformed name */
+        if (c != ' ' && c != '\n')          /* malformed name */
             return ERR;
         nextchar = c;
         *w = '\0';

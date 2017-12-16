@@ -13,6 +13,4 @@ int main(void)
     printf("%s %i\n", GREATINGS, MCONST);
 }
 
-#define SOME_NEW1    123
-
 #define WRONG "so wrong
