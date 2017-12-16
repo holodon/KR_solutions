@@ -12,7 +12,7 @@ hexadecimal according to local custom, and break long text lines.
 #include <stdio.h>
 
 /* max line length */
-#define MAXLINE 80
+#define MAXLINE 85
 
 
 /* pretty-print */
@@ -32,15 +32,15 @@ int main(void)
                 putchar('\n');
             }
         } else {                            /* non-graphic character */
-            pos += 2;
+            pos += 6;
             if (pos == MAXLINE) {
                 pos = 0;
-                printf("%X\n", c);
+                printf("_0x%X\n", c);
             } else if (pos > MAXLINE) {
                 pos = 2;
-                printf("\n%X", c);
+                printf("\n_0x%X_", c);
             } else {
-                printf("%X", c);
+                printf("_0x%X_", c);
             }
         }
     }
