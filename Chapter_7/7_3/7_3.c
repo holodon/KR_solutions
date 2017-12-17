@@ -43,7 +43,7 @@ void minprintf(char *fmt, ...)
 
     /* string buffer for expressions like "%-10s" */
     #define EXPRLEN 10
-    char expr[EXPRLEN + 1];
+    char expr[EXPRLEN];
 
     va_start(ap, fmt);              /* make ap point to 1st unnamed arg */
     for (p = fmt; *p; p++) {
@@ -63,7 +63,7 @@ void minprintf(char *fmt, ...)
         i = 0;
         expr[i++] = '%';
         while (*(p + 1) && !isalpha(*(p + 1))) {
-            if (i == EXPRLEN - 2)
+            if (i == EXPRLEN - 3)
                 p++;                /* skip to prevent overflow */
             else
                 expr[i++] = *++p;
