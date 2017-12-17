@@ -52,6 +52,7 @@ void minprintf(char *fmt, ...)
             continue;
         }
 
+        /* "%%" */
         if (*(p + 1) && (*(p + 1) == '%')) {
             putchar('%');
             p++;
@@ -104,7 +105,7 @@ void minprintf(char *fmt, ...)
             ptr = va_arg(ap, void*);
             printf(expr, ptr);
             break;
-        default:                    /* ignore unknown expression */
+        default:                    /* unknown character */
             putchar('?');
             putchar(*p);
             break;
