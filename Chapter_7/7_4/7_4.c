@@ -2,18 +2,17 @@
 Exercise 7-4. Write a private version of scanf analogous to minprintf from the
 previous section.
 
-Implmented as minsscanf - reading one line at a time from stdin and returning
+Implmented as minscanf - reading one line at a time from stdin and returning
 the count of succesfull matches.
 
-WIP
+WIP - not working (SEGV at line 79)
 */
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <ctype.h>
 
-int minsscanf(char *, ...);
-int mgetline(char [], int lim);
+int minscanf(char *, ...);
 
 #define MAXLINE 100
 char line[MAXLINE];
@@ -21,16 +20,25 @@ char line[MAXLINE];
 
 int main(void)
 {
+    // char expr[10];
+    // expr[0] = '%';          /* build expr in format like %[c] */
+    // expr[1] = '[';
+    // expr[2] = '/';
+    // expr[3] = ']';
+    // expr[4] = '\0';
+    // int t = scanf(expr);
+    // printf("%i\n", t);
+    // return 0;
+
     int day, month, year;
     char monthname[20];
+    int res = 0;
 
-    int l = 0;                      /* line counter */
-
-    while (mgetline(line, sizeof(line)) > 0) {
-        l++;
-        printf("--->line %d:  ", l);
-        printf("%s\n", line);
-        printf("result: %d\n", minsscanf("%d/%d/%d", &day, &month, &year));
+    while (res != -1) {
+        printf("Input: \n");
+        int res = minscanf("%d/%d/%d", &day, &month, &year);
+        printf("result: %d\n", res);
+        printf("d: %d, m: %d, y: %d\n", day, month, year);
         printf("<---\n\n");
     }
 
@@ -38,7 +46,7 @@ int main(void)
 }
 
 /* minprintf: minimal printf with variable argument list */
-int minsscanf(char *fmt, ...)
+int minscanf(char *fmt, ...)
 {
     va_list ap;                     /* points to each unnamed arg in turn */
     char *p, *sval;
@@ -55,12 +63,24 @@ int minsscanf(char *fmt, ...)
 
     va_start(ap, fmt);              /* make ap point to 1st unnamed arg */
     for (p = fmt; *p; p++) {
-        if (*p != '%') {
-            expr[i++] = *p;
+        i = 0;                      /* start over */
+
+        if (*p == ' ') {
+            scanf(" ");             /* skip whitespace */
             continue;
         }
 
-        expr[i++] = '%';
+        if (*p != '%') {            /* arbitrary character */
+            expr[0] = '%';          /* build expr in format like %[c] */
+            expr[1] = '[';
+            expr[2] = *p;
+            expr[3] = ']';
+            expr[4] = '\0';
+            res += scanf(expr);
+            continue;
+        }
+
+        expr[i++] = '%';            /* build an expression */
         while (*(p + 1) && !isalpha(*(p + 1))) {
             if (i == EXPRLEN - 3)
                 p++;                /* too long? skip to prevent overflow */
@@ -74,7 +94,7 @@ int minsscanf(char *fmt, ...)
         switch (*++p) {
         case 's':
             sval = va_arg(ap, char *);
-            res += sscanf(line, expr, sval);
+            res += scanf(expr, sval);
             break;
         case 'd':
         case 'i':
@@ -83,11 +103,11 @@ int minsscanf(char *fmt, ...)
         case 'X':
         case 'c':
             ival = va_arg(ap, int *);
-            res += sscanf(line, expr, ival);
+            res += scanf(expr, ival);
             break;
         case 'u':
             uival = va_arg(ap, unsigned *);
-            res += sscanf(line, expr, uival);
+            res += scanf(expr, uival);
             break;
         case 'f':
         case 'e':
@@ -95,30 +115,15 @@ int minsscanf(char *fmt, ...)
         case 'g':
         case 'G':
             dval = va_arg(ap, double *);
-            res += sscanf(line, expr, dval);
+            res += scanf(expr, dval);
             break;
         default:                    /* unknown character */
-            sscanf(line, expr);
+
+            // scanf(expr);
             break;
         }
-        i = 0;                      /* start over */
     }
     va_end(ap);                     /* clean up when done */
 
     return res;
-}
-
-/* getline: read a line into s, return length */
-int mgetline(char s[], int lim)
-{
-    int c, i;
-
-    for (i=0; i < lim-1 && (c=getchar())!=EOF && c!='\n'; ++i)
-        s[i] = c;
-    if (c == '\n') {
-        s[i] = c;
-        ++i;
-    }
-    s[i] = '\0';
-    return i;
 }
