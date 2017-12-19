@@ -5,47 +5,42 @@ previous section.
 Implmented as minscanf - reading one line at a time from stdin and returning
 the count of succesfull matches.
 
-WIP - not working (SEGV at line 79)
+WIP - now it works but processes just one line
 */
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <ctype.h>
+#define MAXLINE 100
 
 int minscanf(char *, ...);
-
-#define MAXLINE 100
+int mgetline(char [], int);
 char line[MAXLINE];
 
 
 int main(void)
 {
-    // char expr[10];
-    // expr[0] = '%';          /* build expr in format like %[c] */
-    // expr[1] = '[';
-    // expr[2] = '/';
-    // expr[3] = ']';
-    // expr[4] = '\0';
-    // int t = scanf(expr);
-    // printf("%i\n", t);
-    // return 0;
-
     int day, month, year;
     char monthname[20];
     int res = 0;
 
+    // while (mgetline(line, MAXLINE) > 0) {
     while (res != -1) {
         printf("Input: \n");
-        int res = minscanf("%d/%d/%d", &day, &month, &year);
+        res = minscanf(" %d/%d/%d", &day, &month, &year);
         printf("result: %d\n", res);
-        printf("d: %d, m: %d, y: %d\n", day, month, year);
-        printf("<---\n\n");
+        if (res == 3) {
+            printf("d: %d, m: %d, y: %d\n", day, month, year);
+            printf("---Done\n\n");
+        }
+        res = scanf("%*[^\n] ");     /* advance to next line */
+        // res = scanf("\n");    /* consume white space */
     }
 
     return 0;
 }
 
-/* minprintf: minimal printf with variable argument list */
+/* minscanf: minimal scanf with variable argument list */
 int minscanf(char *fmt, ...)
 {
     va_list ap;                     /* points to each unnamed arg in turn */
@@ -71,11 +66,12 @@ int minscanf(char *fmt, ...)
         }
 
         if (*p != '%') {            /* arbitrary character */
-            expr[0] = '%';          /* build expr in format like %[c] */
-            expr[1] = '[';
-            expr[2] = *p;
-            expr[3] = ']';
-            expr[4] = '\0';
+            expr[0] = '%';          /* build expr in format like %*[c] */
+            expr[1] = '*';
+            expr[2] = '[';
+            expr[3] = *p;
+            expr[4] = ']';
+            expr[5] = '\0';
             res += scanf(expr);
             continue;
         }
@@ -126,4 +122,18 @@ int minscanf(char *fmt, ...)
     va_end(ap);                     /* clean up when done */
 
     return res;
+}
+
+/* mgetline: get line into s, return length */
+int mgetline(char s[], int lim)
+{
+    int c, i;
+    i = 0;
+    while (--lim > 0 && (c=getchar()) != EOF && c != '\n')
+        s[i++] = c;
+    if (c == '\n')
+        s[i++] = c;
+    s[i] = '\0';
+
+    return i;
 }
