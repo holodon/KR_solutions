@@ -2,39 +2,38 @@
 Exercise 7-4. Write a private version of scanf analogous to minprintf from the
 previous section.
 
-Implmented as minscanf - reading one line at a time from stdin and returning
-the count of succesfull matches.
+- The gcc warning about line 71 can be ignored, because the 'expr' string is
+not a random one, nor it contains uncontrolled or dangerous expression
+(see l.64-70).
 
-WIP - now it works but processes just one line
+WIP
 */
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <ctype.h>
-#define MAXLINE 100
 
 int minscanf(char *, ...);
-int mgetline(char [], int);
-char line[MAXLINE];
 
 
 int main(void)
 {
     int day, month, year;
     char monthname[20];
-    int res = 0;
+    int res = 0, line = 0;
 
-    // while (mgetline(line, MAXLINE) > 0) {
-    while (res != -1) {
-        printf("Input: \n");
+    while (res != EOF) {
+        line++;
         res = minscanf(" %d/%d/%d", &day, &month, &year);
+        printf("Line: %i\t", line);
         printf("result: %d\n", res);
         if (res == 3) {
+            printf("Full match!\t");
             printf("d: %d, m: %d, y: %d\n", day, month, year);
-            printf("---Done\n\n");
-        }
-        res = scanf("%*[^\n] ");     /* advance to next line */
-        // res = scanf("\n");    /* consume white space */
+        } else
+            printf("no (full) match\n");
+        printf("---Done\n\n");
+        res = scanf("%*[^\n] ");     /* advance to next line/EOF */
     }
 
     return 0;
@@ -58,7 +57,6 @@ int minscanf(char *fmt, ...)
 
     va_start(ap, fmt);              /* make ap point to 1st unnamed arg */
     for (p = fmt; *p; p++) {
-        i = 0;                      /* start over */
 
         if (*p == ' ') {
             scanf(" ");             /* skip whitespace */
@@ -76,6 +74,7 @@ int minscanf(char *fmt, ...)
             continue;
         }
 
+        i = 0;                      /* start over */
         expr[i++] = '%';            /* build an expression */
         while (*(p + 1) && !isalpha(*(p + 1))) {
             if (i == EXPRLEN - 3)
@@ -113,27 +112,11 @@ int minscanf(char *fmt, ...)
             dval = va_arg(ap, double *);
             res += scanf(expr, dval);
             break;
-        default:                    /* unknown character */
-
-            // scanf(expr);
+        default:                    /* unknown character - ignoring */
             break;
         }
     }
     va_end(ap);                     /* clean up when done */
 
     return res;
-}
-
-/* mgetline: get line into s, return length */
-int mgetline(char s[], int lim)
-{
-    int c, i;
-    i = 0;
-    while (--lim > 0 && (c=getchar()) != EOF && c != '\n')
-        s[i++] = c;
-    if (c == '\n')
-        s[i++] = c;
-    s[i] = '\0';
-
-    return i;
 }
