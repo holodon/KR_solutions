@@ -2,11 +2,9 @@
 Exercise 7-4. Write a private version of scanf analogous to minprintf from the
 previous section.
 
-- The gcc warning about line 71 can be ignored, because the 'expr' string is
+- The gcc warning about scanf(expr) can be ignored, because the 'expr' string is
 not a random one, nor it contains uncontrolled or dangerous expression
 (see l.64-70).
-
-WIP
 */
 
 #include <stdio.h>
@@ -20,20 +18,21 @@ int main(void)
 {
     int day, month, year;
     char monthname[20];
-    int res = 0, line = 0;
+    int res = 0, ln = 0;
 
     while (res != EOF) {
-        line++;
+        ln++;
         res = minscanf(" %d/%d/%d", &day, &month, &year);
-        printf("Line: %i\t", line);
+        printf("\nLine: %i\t", ln);
         printf("result: %d\n", res);
         if (res == 3) {
             printf("Full match!\t");
             printf("d: %d, m: %d, y: %d\n", day, month, year);
         } else
             printf("no (full) match\n");
-        printf("---Done\n\n");
-        res = scanf("%*[^\n] ");     /* advance to next line/EOF */
+        printf("---Done\n");
+                                    /* advance to next line/EOF */
+        res = scanf("%*[^\n]%*[\n]");
     }
 
     return 0;
@@ -48,7 +47,6 @@ int minscanf(char *fmt, ...)
     unsigned *uival;
     double *dval;
 
-    int i = 0;                      /* expression index */
     int res = 0;                    /* this will hold the result from scanf */
 
     /* string buffer for expressions like "%-10s" */
@@ -74,7 +72,7 @@ int minscanf(char *fmt, ...)
             continue;
         }
 
-        i = 0;                      /* start over */
+        int i = 0;                  /* expression index */
         expr[i++] = '%';            /* build an expression */
         while (*(p + 1) && !isalpha(*(p + 1))) {
             if (i == EXPRLEN - 3)
