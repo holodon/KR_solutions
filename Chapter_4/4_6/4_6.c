@@ -1,9 +1,9 @@
 /*
-Exercise 4-6. Add commands for handling variables. (It's easy to provide 
-twenty-six variables with single-letter names.) Add a variable for the most 
+Exercise 4-6. Add commands for handling variables. (It's easy to provide
+twenty-six variables with single-letter names.) Add a variable for the most
 recently printed value.
 
-Building on top of 4.3-5
+Building on top of 4.3-4.5
 */
 
 #include <stdio.h>
@@ -255,7 +255,7 @@ void printStack()
     printf("Stack: ");
     while (i < sp)
         printf("%f ", val[i++]);
-    printf("\n");    
+    printf("\n");
 }
 
 
