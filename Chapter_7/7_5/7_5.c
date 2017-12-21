@@ -35,75 +35,83 @@ int main(void)
     char s[MAXOP];
     int adv = 0;
 
+    int err= 0;
+
     while ((type = getop(s)) != EOF) {
         switch (type) {
-            case NUMBER:
-                push(atof(s));
-                break;
-            case '+':
-                push(pop() + pop());
-                break;
-            case '*':
-                push(pop() * pop());
-                break;
-            case '-':
-                op2 = pop();
-                push(pop() - op2);
-                break;
-            case '/':
-                op2 = pop();
-                if (op2 != 0.0)
-                        push(pop() / op2);
-                else
-                        printf("error: zero divisor\n");
-                break;
-            case '%':
-                op2 = pop();
-                if (op2 != 0.0)
-                    push(fmod(pop(), op2));
-                else
+        case NUMBER:
+            push(atof(s));
+            break;
+        case '+':
+            push(pop() + pop());
+            break;
+        case '*':
+            push(pop() * pop());
+            break;
+        case '-':
+            op2 = pop();
+            push(pop() - op2);
+            break;
+        case '/':
+            op2 = pop();
+            if (op2 != 0.0)
+                    push(pop() / op2);
+            else
                     printf("error: zero divisor\n");
-                break;
-            case '^':
-                op2 = pop();
-                push(powf(pop(), op2));
-                break;
-            case 's':
-                push(sin(pop()));
-                break;
-            case 'c':
-                push(cos(pop()));
-                break;
-            case 'e':
-                push(expf(pop()));
-                break;
-            case 'l':       /* use the last value */
-                push(last);
-                break;
-            case 'v':       /* use a variable */
-                push(vars[var]);
-                break;
-            case '\n':
-                if (!adv) {
-                    double d = pop();
-                    last = d;
-                    if (where != -1) {
-                        vars[where] = d;
-                        where = -1;
-                    }
-                    printf("\t%.8g\n", d);
+            break;
+        case '%':
+            op2 = pop();
+            if (op2 != 0.0)
+                push(fmod(pop(), op2));
+            else
+                printf("error: zero divisor\n");
+            break;
+        case '^':
+            op2 = pop();
+            push(powf(pop(), op2));
+            break;
+        case 's':
+            push(sin(pop()));
+            break;
+        case 'c':
+            push(cos(pop()));
+            break;
+        case 'e':
+            push(expf(pop()));
+            break;
+        case 'l':       /* use the last value */
+            push(last);
+            break;
+        case 'v':       /* use a variable */
+            push(vars[var]);
+            break;
+        case '\n':
+            if (!adv) {
+                double d = pop();
+                last = d;
+                if (where != -1) {
+                    vars[where] = d;
+                    where = -1;
                 }
-                adv = 0;
-                break;
-            case ' ':       /* advanced commands */
-                adv = 1;
-                break;
-            case '>':       /* skip */
-                break;
-            default:
-                printf("error: unknown command %s\n", s);
-                printf("use 'h' to get help\n");
-                break;
+                printf("\t%.8g\n", d);
+            }
+            adv = 0;
+            break;
+        case ' ':       /* advanced commands */
+            adv = 1;
+            break;
+        case '>':       /* skip */
+            break;
+        default:
+            err++;
+            printf("(debug) unknown int: %i\n", type);
+            printf("error: unknown command %s\n", s);
+            printf("use 'h' to get help\n\n");
+            if (err == 10) {
+                printf("\ntoo much errors - quitting...\n\n");
+                return 1;
+            }
+            break;
         }
     }
     return 0;
