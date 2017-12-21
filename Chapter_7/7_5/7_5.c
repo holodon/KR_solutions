@@ -4,7 +4,8 @@ sscanf to do the input and number conversion.
 
 Building on top of 4.3-4.6
 
-WIP
+Compile with '-lm' for the math calls.
+WIP - almost ready, still not properly returning EOF
 */
 
 #include <stdio.h>
@@ -134,19 +135,17 @@ double pop(void)
     }
 }
 
-
 #include <ctype.h>
-int getch(void);
-void ungetch(int);
 void printStack();
-
 
 /* getop: get next character or numeric operand */
 int getop(char s[])
 {
-    int i, c;
-    while ((s[0] = c = getch()) == ' ' || c == '\t')
-        ;
+    int i;
+    char c;
+    scanf("%*[ ^/n]");  /* consume all white space except '\n' */
+    scanf("%c", &c);
+    s[0] = c;
     s[1] = '\0';
 
     i = 0;
@@ -189,7 +188,8 @@ int getop(char s[])
         printf("last: \t%.8g\n", last);
         return ' ';
     case '_':
-        s[1] = c = getch();
+        scanf("%c", &c);
+        s[1] = c;
         if (isdigit(c)) {
             var = c;
             return 'v'; /* use a variable */
@@ -201,25 +201,24 @@ int getop(char s[])
             case 'l':   /* use last */
                 return c;
             default:
-                ungetch(c);
                 s[1] = '\0';
                 break;
         }
         break;
     case '@':           /* store the value in a variable */
-        s[1] = c = getch();
+        scanf("%c", &c);
+        s[1] = c;
         if (isdigit(c)) {
             where = c;
             return '>'; /* skip to next */
         }
-        ungetch(c);
         s[1] = '\0';
         break;
     case '.':
         break;
     case '-':           /* '-' followed by number? */
-        if (!isdigit(s[1] = c = getch())) {
-            ungetch(c);
+        scanf("%c", &c);
+        if (!isdigit(s[1] = c)) {
             s[1] = '\0';
             return '-';
         }
@@ -233,17 +232,20 @@ int getop(char s[])
     }
 
     if (isdigit(c))         /* collect integer part */
-        while (isdigit(s[++i] = c = getch()))
-            ;
+        do {
+            scanf("%c", &c);
+            s[++i] = c;
+        } while (isdigit(c));
     if (c == '.')           /* collect fraction part */
-        while (isdigit(s[++i] = c = getch()))
-            ;
+        do {
+            scanf("%c", &c);
+            s[++i] = c;
+        } while (isdigit(c));
     s[i] = '\0';
-    if (c != EOF)
-        ungetch(c);
+    // if (c != EOF)
+    //     ungetch(c);
     return NUMBER;
 }
-
 
 /* print the stack */
 void printStack()
@@ -258,7 +260,6 @@ void printStack()
         printf("%f ", val[i++]);
     printf("\n");
 }
-
 
 /* print usage */
 void printUsage()
@@ -276,26 +277,4 @@ void printUsage()
         "\n\t'_l' (last result), "
         "\n\t'@[0-9]' (set gen. purpose variable),"
         "\n\t'_[0-9]' (use gen. purpose variable)\n\n");
-}
-
-
-#define BUFSIZE 100
-char buf[BUFSIZE];      /* buffer for ungetch */
-int bufp = 0;           /* next free position in buf */
-
-
-/* get a (possibly pushed-back) character */
-int getch(void)
-{
-    return (bufp > 0) ? buf[--bufp] : getchar();
-}
-
-
-/* push character back on input */
-void ungetch(int c)
-{
-    if (bufp >= BUFSIZE)
-        printf("ungetch: too many characters\n");
-    else
-        buf[bufp++] = c;
 }
