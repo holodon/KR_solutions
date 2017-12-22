@@ -32,22 +32,36 @@ int main(int argc, char *argv[])
     }
 
     char line_f[MAXLINE], line_s[MAXLINE];  /* line buffers */
-    int line = 0;                           /* line counter */
+    int lc_f, lc_s;                         /* line counter */
+    lc_f = lc_s = 0;
     int res = 0;
+    int eoff = 0;                           /* EOF watcher */
 
-    while ((fgets(line_f, MAXLINE, fpf) != NULL) &&
-                (fgets(line_s, MAXLINE, fps) != NULL)) {
-        line++;
+    do {
+        if (fgets(line_f, MAXLINE, fpf) == NULL)
+            eoff = 1;
+        else
+            lc_f++;
+
+        if (fgets(line_s, MAXLINE, fps) == NULL)
+            eoff = 1;
+        else
+            lc_s++;
+
         if (strcmp(line_f, line_s) != 0) {
-            printf("first difference at line %i:\n", line);
-            printf("line %i in \"%s\":\n\t%s\n", line, name_f, line_f);
-            printf("line %i in \"%s\":\n\t%s\n", line, name_s, line_s);
             res = 1;
             break;
         }
-    }
+    } while (!eoff);
 
-    if (!res)
+    if (lc_f != lc_s)
+        printf("The file \"%s\" is %s than \"%s\".\n",
+                name_f, (lc_f > lc_s)? "bigger":"smaller", name_s);
+    else if (res) {
+        printf("first difference at line %i:\n", lc_f);
+        printf("line %i in \"%s\":\n\t%s\n", lc_f, name_f, line_f);
+        printf("line %i in \"%s\":\n\t%s\n", lc_f, name_s, line_s);
+    } else
         printf("The files \"%s\" and \"%s\" has the same content.\n",
                 name_f, name_s);
 
