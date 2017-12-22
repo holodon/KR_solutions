@@ -5,7 +5,6 @@ sscanf to do the input and number conversion.
 Building on top of 4.3-4.6
 
 Compile with '-lm' for the math calls.
-WIP - almost ready, still not properly returning EOF
 */
 
 #include <stdio.h>
@@ -20,6 +19,7 @@ void push(double);
 double pop(void);
 void printUsage();
 
+char lc = EOF;          /* last found char */
 double last = 0;        /* last printed value */
 double vars[] =         /* general purpose variables */
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -79,10 +79,10 @@ int main(void)
         case 'e':
             push(expf(pop()));
             break;
-        case 'l':       /* use the last value */
+        case 'l':                           /* use the last value */
             push(last);
             break;
-        case 'v':       /* use a variable */
+        case 'v':                           /* use a variable */
             push(vars[var]);
             break;
         case '\n':
@@ -97,10 +97,10 @@ int main(void)
             }
             adv = 0;
             break;
-        case ' ':       /* advanced commands */
+        case ' ':                           /* advanced commands */
             adv = 1;
             break;
-        case '>':       /* skip */
+        case '>':                           /* skip */
             break;
         default:
             err++;
@@ -114,12 +114,14 @@ int main(void)
             break;
         }
     }
+
+    printf("Done.\n");
     return 0;
 }
 
-#define MAXVAL 100          /* maximum depth of val stack */
-int sp = 0;                 /* next free stack position */
-double val[MAXVAL];         /* value stack */
+#define MAXVAL 100                          /* maximum depth of val stack */
+int sp = 0;                                 /* next free stack position */
+double val[MAXVAL];                         /* value stack */
 
 
 /* push: push f onto value stack */
@@ -151,21 +153,37 @@ int getop(char s[])
 {
     int i;
     char c;
-    scanf("%*[ ^/n]");  /* consume all white space except '\n' */
-    scanf("%c", &c);
+    int r;                                  /* holds the result of scanf */
+    r = scanf("%*[ \t]");                   /* consume white space w/o '\n' */
+    if (r == EOF)
+        return r;
+    r = scanf("%c", &c);
+    if (r == EOF)
+        return r;
+
+    if (c == '\n') {
+        if (lc == EOF) {
+            r = scanf("%*[ \t\n]%c", &c);   /* consume starting white space */
+            lc = c;
+        }
+        r = scanf("%*[\n]");                /* consume multiple '\n's */
+    }
+    if (r == EOF)
+        return r;
+
     s[0] = c;
     s[1] = '\0';
 
     i = 0;
 
     switch (c) {
-    case 'h':           /* help */
+    case 'h':                               /* help */
         printUsage();
         return ' ';
-    case 'p':           /* print */
+    case 'p':                               /* print */
         printStack();
         return ' ';
-    case 'd':           /* duplicate */
+    case 'd':                               /* duplicate */
         if (((sp - 1) * 2 + 1) >= MAXVAL) {
             printf("Unable to duplicate - possible stack overflow\n");
             return ' ';
@@ -178,7 +196,7 @@ int getop(char s[])
         sp += i;
         printStack();
         return ' ';
-    case 's':           /* swap */
+    case 's':                               /* swap */
         if (sp < 2) {
             printf("Too few elements\n");
             return ' ';
@@ -188,44 +206,50 @@ int getop(char s[])
         val[sp - 2] = i;
         printStack();
         return ' ';
-    case 'c':           /* clear */
+    case 'c':                               /* clear */
         sp = 0;
         printStack();
         return ' ';
-    case 'l':           /* print last */
+    case 'l':                               /* print last */
         printf("last: \t%.8g\n", last);
         return ' ';
     case '_':
-        scanf("%c", &c);
+        r = scanf("%c", &c);
+        if (r == EOF)
+            return r;
         s[1] = c;
         if (isdigit(c)) {
             var = c;
-            return 'v'; /* use a variable */
+            return 'v';                     /* use a variable */
         }
         switch (c) {
-            case 's':   /* sin */
-            case 'c':   /* cos */
-            case 'e':   /* exp */
-            case 'l':   /* use last */
+            case 's':                       /* sin */
+            case 'c':                       /* cos */
+            case 'e':                       /* exp */
+            case 'l':                       /* use last */
                 return c;
             default:
                 s[1] = '\0';
                 break;
         }
         break;
-    case '@':           /* store the value in a variable */
-        scanf("%c", &c);
+    case '@':                               /* store the value in a variable */
+        r = scanf("%c", &c);
+        if (r == EOF)
+            return r;
         s[1] = c;
         if (isdigit(c)) {
             where = c;
-            return '>'; /* skip to next */
+            return '>';                     /* skip to next */
         }
         s[1] = '\0';
         break;
     case '.':
         break;
-    case '-':           /* '-' followed by number? */
-        scanf("%c", &c);
+    case '-':                               /* '-' followed by number? */
+        r = scanf("%c", &c);
+        if (r == EOF)
+            return r;
         if (!isdigit(s[1] = c)) {
             s[1] = '\0';
             return '-';
@@ -239,19 +263,21 @@ int getop(char s[])
         break;
     }
 
-    if (isdigit(c))         /* collect integer part */
+    if (isdigit(c))                         /* collect integer part */
         do {
-            scanf("%c", &c);
+            r = scanf("%c", &c);
+            if (r == EOF)
+                return r;
             s[++i] = c;
         } while (isdigit(c));
-    if (c == '.')           /* collect fraction part */
+    if (c == '.')                           /* collect fraction part */
         do {
-            scanf("%c", &c);
+            r = scanf("%c", &c);
+            if (r == EOF)
+                return r;
             s[++i] = c;
         } while (isdigit(c));
     s[i] = '\0';
-    // if (c != EOF)
-    //     ungetch(c);
     return NUMBER;
 }
 
