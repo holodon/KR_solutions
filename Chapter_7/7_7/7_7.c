@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
     } else {                                /* read the supplied files */
         char *pattern = *argv;
         FILE *fp;
-        while (*++argv) {
-            if ((fp = fopen(*argv, "r")) == NULL) {
+        while (--argc > 0) {
+            if ((fp = fopen(*++argv, "r")) == NULL) {
                 fprintf(stderr, "find: can't open file %s\n.", *argv);
                 return -1;
             }

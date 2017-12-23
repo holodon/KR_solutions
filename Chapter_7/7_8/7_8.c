@@ -23,8 +23,8 @@ int main(int argc, char *argv[])
     char line[MAXLINE];                     /* line buffer */
     FILE *fp;
 
-    while (*++argv) {
-        if ((fp = fopen(*argv, "r")) == NULL) {
+    while (--argc > 0) {
+        if ((fp = fopen(*++argv, "r")) == NULL) {
             fprintf(stderr, "fcat: can't open file %s\n.", *argv);
             return -1;
         }
