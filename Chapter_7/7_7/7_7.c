@@ -2,8 +2,6 @@
 Exercise 7-7. Modify the pattern finding program of Chapter 5 to take its input
 from a set of named files or, if no files are named as arguments, from the
 standard input. Should the file name be printed when a matching line is found?
-
-WIP
 */
 
 #include <stdio.h>
@@ -32,21 +30,45 @@ int main(int argc, char *argv[])
             default:
                 printf("find: illegal option %c\n", c);
                 argc = 0;
-                found = -1;
                 break;
             }
-    if (argc != 1)
-        printf("Usage: find -x -n pattern\n");
-    else
+    if (argc < 1) {
+        printf("Usage: find [-x] [-n] pattern [file...]\n");
+        return -1;
+    }
+
+    if (argc == 1)                          /* no files - read stdin */
         while (mgetline(line, MAXLINE) > 0) {
             lineno++;
             if ((strstr(line, *argv) != NULL) != except) {
                 if (number)
-                printf("%ld:", lineno);
-            printf("%s", line);
-            found++;
+                    printf("%ld:", lineno);
+                printf("%s", line);
+                found++;
+        }
+    } else {                                /* read the supplied files */
+        char *pattern = *argv;
+        FILE *fp;
+        while (*++argv) {
+            if ((fp = fopen(*argv, "r")) == NULL) {
+                fprintf(stderr, "find: can't open file %s\n.", *argv);
+                return -1;
+            }
+            lineno = 0;
+            while (fgets(line, MAXLINE, fp) != NULL) {
+                lineno++;
+                if ((strstr(line, pattern) != NULL) != except) {
+                    printf("(%s) ", *argv);
+                    if (number)
+                        printf("%ld: ", lineno);
+                    printf("%s", line);
+                    found++;
+                }
+            }
         }
     }
+
+    printf("\nTotal: %i occurrences.\n", found);
     return found;
 }
 
