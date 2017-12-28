@@ -1,7 +1,9 @@
 /*
-Exercise 8-3. Design and write _flushbuf , fflush , and fclose .
+Exercise 8-2. Rewrite fopen and _fillbuf with fields instead of explicit bit
+operations. Compare code size and execution speed.
 
-- Based on 8_2
+- K&R version with bit operations.
+- Some identifiers renamed to avoid collisions with stdio.h
 */
 
 #include <stdio.h>
@@ -11,14 +13,23 @@ Exercise 8-3. Design and write _flushbuf , fflush , and fclose .
 #include <unistd.h>
 
 
-#define OPEN_MAX 20 /* max #files open at once */
+#define OPEN_MAX 20     /* max #files open at once */
+#define PERMS 0666      /* RW for owner, group, others */
+
+enum _flags {
+    _READ   = 01,       /* file open for reading */
+    _WRITE  = 02,       /* file open for writing */
+    _UNBUF  = 04,       /* file is unbuffered */
+    _EOF    = 010,      /* EOF has occurred on this file */
+    _ERR    = 020       /* error occurred on this file */
+};
 
 typedef struct _iobuf {
-    int cnt;        /* characters left */
-    char *ptr;      /* next character position */
-    char *base;     /* location of buffer */
-    int flag;       /* mode of file access */
-    int fd;         /* file descriptor */
+    int cnt;            /* characters left */
+    char *ptr;          /* next character position */
+    char *base;         /* location of buffer */
+    enum _flags flag;   /* mode of file access */
+    int fd;             /* file descriptor */
 } MFILE;
 
 MFILE _iob[OPEN_MAX];
@@ -27,16 +38,7 @@ MFILE _iob[OPEN_MAX];
 #define mstdout (&_iob[1])
 #define mstderr (&_iob[2])
 
-enum _flags {
-    _READ   = 01,   /* file open for reading */
-    _WRITE  = 02,   /* file open for writing */
-    _UNBUF  = 04,   /* file is unbuffered */
-    _EOF    = 010,  /* EOF has occurred on this file */
-    _ERR    = 020   /* error occurred on this file */
-};
-
 int _fillbuf(MFILE *);
-// int _flushbuf(int, MFILE *);
 
 #define mfeof(p)        ((p)->flag & _EOF) != 0)
 #define mferror(p)      ((p)->flag & _ERR) != 0)
@@ -44,22 +46,16 @@ int _fillbuf(MFILE *);
 
 #define mgetc(p)        (--(p)->cnt >= 0 \
                             ? (unsigned char) *(p)->ptr++ : _fillbuf(p))
-// #define mputc(x,p)      (--(p)->cnt >= 0 \
-//                             ? *(p)->ptr++ = (x) : _flushbuf((x),p))
 #define mgetchar()      mgetc(mstdin)
-// #define mputchar(x)     mputc((x), mstdout)
-
-
-#define PERMS 0666  /* RW for owner, group, others */
 
 MFILE *mfopen(char *, char *);
 void error(char *, ...);
 char *prog;                                 /* program name for errors */
 
 
-
 /* play with a file using our routines */
 int main(int argc, char *argv[]) {
+
     MFILE _iob[OPEN_MAX] = {                /* stdin, stdout, stderr */
         { 0, (char *) 0, (char *) 0, _READ, 0 },
         { 0, (char *) 0, (char *) 0, _WRITE, 1 },
@@ -75,18 +71,6 @@ int main(int argc, char *argv[]) {
 
     int c;
     MFILE *fp;
-/*
-    if ((fp = mfopen(argv[1], "a")) == NULL)
-        error("can't open %s", argv[1]);
-
-    char *toappend = "this is new\n";
-    while (toappend) {
-        mputc(*toappend, fp);
-        toappend++;
-    }
-
-    close(fp->fd);
-*/
     if ((fp = mfopen(argv[1], "r")) == NULL)
         error("can't open %s", argv[1]);
 
@@ -94,7 +78,7 @@ int main(int argc, char *argv[]) {
         putchar(c);
 
     free(fp->base);
-    close(fp->fd);
+    close(mfileno(fp));
 
     return 0;
 }
