@@ -2,6 +2,8 @@
 Exercise 8-3. Design and write _flushbuf , fflush , and fclose .
 
 - Based on 8_2
+- The K&R code uses buffer for both reading and writing, so we have to flush
+them both.
 */
 
 #include <stdio.h>
@@ -36,7 +38,7 @@ enum _flags {
 };
 
 int _fillbuf(MFILE *);
-// int _flushbuf(int, MFILE *);
+int _flushbuf(int, MFILE *);
 
 #define mfeof(p)        ((p)->flag & _EOF) != 0)
 #define mferror(p)      ((p)->flag & _ERR) != 0)
@@ -44,10 +46,10 @@ int _fillbuf(MFILE *);
 
 #define mgetc(p)        (--(p)->cnt >= 0 \
                             ? (unsigned char) *(p)->ptr++ : _fillbuf(p))
-// #define mputc(x,p)      (--(p)->cnt >= 0 \
-//                             ? *(p)->ptr++ = (x) : _flushbuf((x),p))
+#define mputc(x,p)      (--(p)->cnt >= 0 \
+                            ? *(p)->ptr++ = (x) : _flushbuf((x),p))
 #define mgetchar()      mgetc(mstdin)
-// #define mputchar(x)     mputc((x), mstdout)
+#define mputchar(x)     mputc((x), mstdout)
 
 
 #define PERMS 0666  /* RW for owner, group, others */
@@ -55,14 +57,19 @@ int _fillbuf(MFILE *);
 MFILE *mfopen(char *, char *);
 void error(char *, ...);
 char *prog;                                 /* program name for errors */
+int _flushbuf(int, MFILE *);
+int mfflush(MFILE *);
+int mfclose(MFILE *);
 
 
-
-/* play with a file using our routines */
+/* play with a file using our new routines */
 int main(int argc, char *argv[]) {
     MFILE _iob[OPEN_MAX] = {                /* stdin, stdout, stderr */
         { 0, (char *) 0, (char *) 0, _READ, 0 },
+
         { 0, (char *) 0, (char *) 0, _WRITE, 1 },
+        // { 0, (char *) 0, (char *) 0, _WRITE | _UNBUF, 1 },
+
         { 0, (char *) 0, (char *) 0, _WRITE | _UNBUF, 2 }
     };
 
@@ -75,26 +82,26 @@ int main(int argc, char *argv[]) {
 
     int c;
     MFILE *fp;
-/*
+
+    /* append */
     if ((fp = mfopen(argv[1], "a")) == NULL)
         error("can't open %s", argv[1]);
-
+    // fp->flag |= _UNBUF;                  /* to test with unbuffered write */
     char *toappend = "this is new\n";
-    while (toappend) {
+    while (*toappend) {
         mputc(*toappend, fp);
         toappend++;
     }
+    mfclose(fp);
 
-    close(fp->fd);
-*/
+    /* read */
     if ((fp = mfopen(argv[1], "r")) == NULL)
         error("can't open %s", argv[1]);
-
     while ((c = mgetc(fp)) != EOF)
-        putchar(c);
+        mputchar(c);
+    mfclose(fp);
+    mfclose(mstdout);
 
-    free(fp->base);
-    close(fp->fd);
 
     return 0;
 }
@@ -154,6 +161,73 @@ int _fillbuf(MFILE *fp)
         return EOF;
     }
     return (unsigned char) *fp->ptr++;
+}
+
+/* allocate and flush buffer */
+int _flushbuf(int c, MFILE *fp)
+{
+    /* fp has to exists, be open for writing and error-free */
+    if (fp == NULL || ((fp->flag & (_WRITE | _ERR | _EOF)) != _WRITE))
+        return EOF;
+
+    int err = 0;
+
+    /* unbuffered write? */
+    if (fp->flag & _UNBUF) {
+        if (write(fp->fd, &c, 1) != 1) {
+            err = 1;
+        } else {
+            fp->ptr = fp->base = NULL;
+            fp->cnt = 0;
+            return c;
+        }
+    }
+
+    /* buffered write */
+    int bufsize = BUFSIZ - 1;
+    if (fp->base == NULL) {                 /* buffer still does not exists */
+        if ((fp->base = (char *) malloc(bufsize)) == NULL)
+            err = 1;                        /* memory error */
+    } else {                                /* buffer exists - flush it */
+        int nc = fp->ptr - fp->base;
+        if (write(fp->fd, fp->base, nc) != nc)
+            err = 1;
+    }
+
+    /* error occurred */
+    if (err) {
+        fp->flag |= _ERR;
+        return EOF;
+    }
+
+    fp->ptr = fp->base;
+    *fp->ptr++ = (char) c;                  /* save c in the new buffer */
+    fp->cnt = BUFSIZ - 1;
+    return c;
+}
+
+/* flush the buffer for a file / all streams */
+int mfflush(MFILE *fp)
+{
+    int i;
+    if (fp == NULL)                        /* flush all output streams */
+        for (i = 0; i < OPEN_MAX; i++)
+            _flushbuf(EOF, &_iob[i]);
+    else if ((fp->flag & _UNBUF) == 0)     /* flush necessary? */
+        _flushbuf(EOF, fp);
+
+    return 0;
+}
+
+/* free memory and close file */
+int mfclose(MFILE *fp)
+{
+    mfflush(fp);
+    free(fp->base);
+    fp->ptr = fp->base = NULL;
+    fp->cnt = 0;
+    fp->flag = 0;
+    return close(fp->fd);
 }
 
 /* error: print an error message and die */
