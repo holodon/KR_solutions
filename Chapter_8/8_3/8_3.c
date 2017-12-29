@@ -37,9 +37,6 @@ enum _flags {
     _ERR    = 020   /* error occurred on this file */
 };
 
-int _fillbuf(MFILE *);
-int _flushbuf(int, MFILE *);
-
 #define mfeof(p)        ((p)->flag & _EOF) != 0)
 #define mferror(p)      ((p)->flag & _ERR) != 0)
 #define mfileno(p)      ((p)->fd)
@@ -57,6 +54,8 @@ int _flushbuf(int, MFILE *);
 MFILE *mfopen(char *, char *);
 void error(char *, ...);
 char *prog;                                 /* program name for errors */
+
+int _fillbuf(MFILE *);
 int _flushbuf(int, MFILE *);
 int mfflush(MFILE *);
 int mfclose(MFILE *);
