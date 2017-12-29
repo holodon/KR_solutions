@@ -96,6 +96,7 @@ int main(int argc, char *argv[]) {
         mputc(*toappend, fp);
         toappend++;
     }
+    /* seek to some position and write there */
     mfseek(fp, 22, 0);
     mputc('X', fp);
     mfclose(fp);
@@ -103,6 +104,7 @@ int main(int argc, char *argv[]) {
     /* read */
     if ((fp = mfopen(argv[1], "r")) == NULL)
         error("can't open %s", argv[1]);
+    /* seek to some position and start reading */
     mfseek(fp, 14, 0);
     while ((c = mgetc(fp)) != EOF)
         mputchar(c);
