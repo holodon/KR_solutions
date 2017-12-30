@@ -51,11 +51,8 @@ int main(void)
     *pi = 755;
     printf("%i\n", *pi);
 
-    printf("%p\n", *freep);
     mfree(pc);
-    printf("%p\n", *freep);
     mfree(pi);
-    printf("%p\n", *freep);
 
     return 0;
 }
