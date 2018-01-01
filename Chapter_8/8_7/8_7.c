@@ -5,7 +5,8 @@ Improve these routines so they make more pains with error checking.
 
 - More comments - K&R malloc it is a great piece of software,
     after understanding it.
-- Modified mfree to make sure the pointer does not get reused
+- Modified mfree to make sure a pointer cannot be reused, also safe free(NULL)
+- Added "visualization".
 
 - WIP - still not ready
 */
@@ -29,8 +30,9 @@ typedef union header Header;
 
 static Header *morecore(size_t);
 void *mmalloc(size_t);
-void mfree(void *);
+void _mfree(void **);
 void visualize(const char*);
+size_t getfreem(void);
 
 size_t totmem = 0;              /* total memory requested trough sbrk */
 
@@ -38,58 +40,89 @@ static Header base;             /* empty list to get started */
 static Header *freep = NULL;    /* start of free list */
 // #define NALLOC 1024             /* minimum chunks to request */
 #define NALLOC 1                /* for testing */
+#define mfree(p) _mfree((void **)&p)
 
 
 int main(void)
 {
-    char *pc;
-    long *pd;
-    int dlen = 10;
+    char *pc, *pcc, *pccc, *ps;
+    long *pd, *pdd;
+    int dlen = 100;
     int ddlen = 50;
 
     visualize("start");
 
-    /* claim and then free a string */
-    if ((pc = (char *) mmalloc(dlen * sizeof(char))) == NULL)
-        return -1;
-    visualize("string alloc");
-    mfree(pc);
-    visualize("free(string)");
 
-    /* claim and then free a char */
+    /* trying to fragment as much as possible to get a more interesting view */
+
+    /* claim a char */
     if ((pc = (char *) mmalloc(sizeof(char))) == NULL)
         return -1;
-    visualize("char alloc");
-    mfree(pc);
-    visualize("free(char)");
 
+    /* claim a string */
+    if ((ps = (char *) mmalloc(dlen * sizeof(char))) == NULL)
+        return -1;
 
-    /* claim and then free a doubles */
+    /* claim some doubles */
     if ((pd = (long *) mmalloc(ddlen * sizeof(long))) == NULL)
         return -1;
-    visualize("long alloc");
+
+    /* claim some more doubles */
+    if ((pdd = (long *) mmalloc(ddlen * 2 * sizeof(long))) == NULL)
+        return -1;
+
+    /* claim one more char */
+    if ((pcc = (char *) mmalloc(sizeof(char))) == NULL)
+        return -1;
+
+    /* claim the last char */
+    if ((pccc = (char *) mmalloc(sizeof(char))) == NULL)
+        return -1;
+
+
+    /* free and visualize */
+    printf("\n");
+    mfree(pccc);
+    /*      bugged on purpose to test free(NULL) */
+    mfree(pccc);
+    visualize("free(the last char)");
+
+    mfree(pdd);
+    visualize("free(lot of doubles)");
+
+    mfree(ps);
+    visualize("free(string)");
 
     mfree(pd);
-    visualize("free(double)");
+    visualize("free(less doubles)");
 
+    mfree(pc);
+    visualize("free(first char)");
+
+    mfree(pcc);
+    visualize("free(second char)");
+
+
+    /* check memory condition */
+    size_t freemem = getfreem();
+    printf("\n");
     printf("--- Memory claimed  : %ld chunks\n", totmem);
-    printf("    Free memory now : %ld chunks\n", freep->s.size);
+    printf("    Free memory now : %ld chunks\n", freemem);
     if (freep->s.size == totmem)
         printf("    No memory leaks detected.\n");
     else
         printf("    (!) Leaking memory: %ld chunks.\n",
-                    (totmem - freep->s.size));
-    printf("// Done.\n");
+                    (totmem - freemem));
+    printf("// Done.\n\n");
 
     return 0;
 }
 
 
-/* visualize: print the circular tree (educational purpose) */
+/* visualize: print the free list (educational purpose) */
 void visualize(const char* msg)
 {
     Header *tmp;
-    tmp = freep;                            /* find the start of the list */
 
     printf("--- Free list after \"%s\":\n", msg);
 
@@ -98,18 +131,35 @@ void visualize(const char* msg)
         return;
     }
 
-    if  (tmp == tmp->s.ptr) {               /* self-pointing list = empty */
+    if  (freep == freep->s.ptr) {               /* self-pointing list = empty */
         printf("\tList is empty\n\n");
         return;
     }
 
-    printf("  ");
-    while (tmp->s.ptr != freep) {           /* traverse the list */
-        printf("ptr: %p size: %lu -->  ", (void *) tmp, tmp->s.ptr->s.size);
+    printf("  ptr: %10p size: %-3lu -->  ", (void *) freep, freep->s.size);
+
+    tmp = freep;                            /* find the start of the list */
+    while (tmp->s.ptr > freep) {           /* traverse the list */
         tmp = tmp->s.ptr;
+        printf("ptr: %10p size: %-3lu -->  ", (void *) tmp, tmp->s.size);
     }
-    printf("end\n");
-    printf("\tTotal memory claimed: %lu chunks\n\n", totmem);
+    printf("end\n\n");
+}
+
+
+/* calculate the total amount of available free memory */
+size_t getfreem(void)
+{
+    Header *tmp;
+    tmp = freep;
+    size_t res = tmp->s.size;
+
+    while (tmp->s.ptr > tmp) {
+        tmp = tmp->s.ptr;
+        res += tmp->s.size;
+    }
+
+    return res;
 }
 
 
@@ -170,27 +220,32 @@ static Header *morecore(size_t nu)
     if (cp == (char *) -1)                  /* no space at all */
         return NULL;
 
-    printf("... (sbrk) claimed %ld chunks\n", nu);
+    printf("... (sbrk) claimed %ld chunks.\n", nu);
     totmem += nu;                           /* keep track of allocated memory */
 
     up = (Header *) cp;
     up->s.size = nu;
 
     /* add the free space to the circular list */
-    mfree((void *)(up+1));
+    void *n = (void *)(up+1);
+    mfree(n);
 
     return freep;
 }
 
 
 /* mfree: put block ap in free list */
-void mfree(void *ap)
+void _mfree(void **ap)
 {
-    if (ap == NULL)
+    if (*ap == NULL)
         return;
 
     Header *bp, *p;
-    bp = (Header *)ap - 1;                  /* point to block header */
+    bp = (Header *)*ap - 1;                 /* point to block header */
+
+    /* the free space is only marked as free, but 'ap' still points to it */
+    /* to avoid reusing this address and corrupt our structure set it to '\0' */
+    *ap = NULL;
 
     /* look where to insert the free space */
 
@@ -228,8 +283,4 @@ void mfree(void *ap)
 
     /* reset the start of the free list */
     freep = p;
-
-    /* the free space is only marked as free, but 'ap' still points to it */
-    /* to avoid reusing this address and corrupt our structure set it to NULL */
-    ap = NULL;
 }
