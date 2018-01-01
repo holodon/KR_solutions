@@ -110,7 +110,7 @@ int main(void)
                 totmem, totmem * sizeof(Header));
     printf("    Free memory now : %ld chunks (%ld bytes)\n",
                 freemem, freemem * sizeof(Header));
-    if (freep->s.size == totmem)
+    if (freemem == totmem)
         printf("    No memory leaks detected.\n");
     else
         printf("    (!) Leaking memory: %ld chunks (%ld bytes).\n",
