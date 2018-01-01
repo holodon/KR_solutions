@@ -1,5 +1,5 @@
 /*
-Exercise 4-11. Modify getop so that it doesn't need to use ungetch . Hint: 
+Exercise 4-11. Modify getop so that it doesn't need to use ungetch . Hint:
 use an internal static variable.
 
 Building on top of 4.3-6,9
@@ -203,12 +203,12 @@ int getop(char s[])
                 default:
 
                     // ungetch
-                    if (c != EOF)
+                    if (c != EOF) {
                         if (bufp >= BUFSIZE)
                             printf("ungetch: too many characters\n");
                         else
                             buf[bufp++] = c;
-
+                    }
                     s[1] = '\0';
                     break;
             }
@@ -221,28 +221,28 @@ int getop(char s[])
             }
 
             // ungetch
-            if (c != EOF)
+            if (c != EOF) {
                 if (bufp >= BUFSIZE)
                     printf("ungetch: too many characters\n");
                 else
                     buf[bufp++] = c;
-
+            }
             s[1] = '\0';
             break;
         case '.':
             break;
         case '-':           /* '-' followed by number? */
-            if (!isdigit(s[1] = c = 
-                    ((bufp > 0) 
-                        ? buf[--bufp] 
+            if (!isdigit(s[1] = c =
+                    ((bufp > 0)
+                        ? buf[--bufp]
                         : getchar()) )) {
                 // ungetch
-                if (c != EOF)
+                if (c != EOF) {
                     if (bufp >= BUFSIZE)
                         printf("ungetch: too many characters\n");
                     else
                         buf[bufp++] = c;
-
+                }
                 s[1] = '\0';
                 return '-';
             }
@@ -263,11 +263,12 @@ int getop(char s[])
             ;
     s[i] = '\0';
     // ungetch
-    if (c != EOF)
+    if (c != EOF) {
         if (bufp >= BUFSIZE)
             printf("ungetch: too many characters\n");
         else
             buf[bufp++] = c;
+    }
     return NUMBER;
 }
 
@@ -283,7 +284,7 @@ void printStack()
     printf("Stack: ");
     while (i < sp)
         printf("%f ", val[i++]);
-    printf("\n");    
+    printf("\n");
 }
 
 

@@ -1,6 +1,6 @@
 /*
-Exercise 5-15. Add the option -f to fold upper and lower case together, so 
-that case distinctions are not made during sorting; for example, a and A 
+Exercise 5-15. Add the option -f to fold upper and lower case together, so
+that case distinctions are not made during sorting; for example, a and A
 compare equal.
 */
 
@@ -18,7 +18,7 @@ char *lineptr[MAXLINES];            /* pointers to text lines */
 int readlines(char *lineptr[], int nlines, char storage[]);
 void writelines(char *lineptr[], int nlines);
 
-void mqsort(void *lineptr[], int left, int right, 
+void mqsort(void *lineptr[], int left, int right,
     int (*comp)(void *, void *));
 int numcmp(char *, char *);
 
@@ -32,13 +32,11 @@ int main(int argc, char *argv[])
     int numeric = 0;                /* 1 if numeric sort */
     int ignorecase = 0;             /* 1 if ignoring case */
 
-    int error = 0;
-
     // check arguments, set flags
     char **args = argv;
     int c;
-    while(--argc > 0 && (*++args)[0] == '-')
-        while(c = *++args[0])
+    while (--argc > 0 && (*++args)[0] == '-')
+        while ((c = *++args[0]))
             switch(c)
             {
                 case 'f':
@@ -63,9 +61,12 @@ int main(int argc, char *argv[])
 
     if ((nlines = readlines(lineptr, MAXLINES, storage)) >= 0) {
         mqsort((void**) lineptr, 0, nlines-1,
-            (int (*)(void*,void*))(
-                numeric ? numcmp : (ignorecase? strcasecmp: strcmp)
-                ));
+            numeric
+                ? (int (*)(void*,void*)) numcmp
+                : ignorecase
+                    ? (int (*)(void*,void*)) strcasecmp
+                    : (int (*)(void*,void*)) strcmp
+                );
         writelines(lineptr, nlines);
         return 0;
     } else {
@@ -140,7 +141,7 @@ void swap(void *v[],int i, int j)
 /* pointer version */
 int mgetline(char *s, int lim)
 {
-    int c, i;
+    int i;
     i = 0;
     while (--lim > 0 && (*s = getchar()) != EOF && *s != '\n') {
         s++;

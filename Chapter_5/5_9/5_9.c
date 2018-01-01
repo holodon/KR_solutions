@@ -1,5 +1,5 @@
 /*
-Exercise 5-9. Rewrite the routines day_of_year and month_day with pointers 
+Exercise 5-9. Rewrite the routines day_of_year and month_day with pointers
 instead of indexing.
 */
 
@@ -68,13 +68,15 @@ int month_day(int year, int yearday, int *pmonth, int *pday)
 {
     if (!check_yd(year, yearday))
         return -1;
-    
+
     int i, leap;
     leap = isleap(year);
     for (i = 1; yearday > (*(daytab_p + leap))[i]; i++)
        yearday -= (*(daytab_p + leap))[i];
     *pmonth = i;
     *pday = yearday;
+
+    return 0;
 }
 
 /* check if year is leap */
@@ -94,17 +96,17 @@ int check_year(int year)
 /* check if year and yearday are valid */
 int check_yd(int year, int yearday)
 {
-    return 
-        check_year(year) && 
-        (1 <= yearday) && 
+    return
+        check_year(year) &&
+        (1 <= yearday) &&
         (yearday <= (isleap(year)? 366:365));
 }
 
 /* check if year, month and day are valid */
 int check_ymd(int year, int month, int day)
 {
-    return 
-        check_year(year) && 
-        (1 <= month <= 12) && 
-        (1 <= day <= daytab[isleap(year)][month]);
+    return
+        check_year(year) &&
+        (1 <= month) && (month <= 12) &&
+        (1 <= day) && (day <= daytab[isleap(year)][month]);
 }

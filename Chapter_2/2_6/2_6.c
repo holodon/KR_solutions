@@ -1,6 +1,6 @@
 /*
-Exercise 2-6. Write a function setbits(x,p,n,y) that returns x with the n 
-bits that begin at position p set to the rightmost n bits of y , leaving the 
+Exercise 2-6. Write a function setbits(x,p,n,y) that returns x with the n
+bits that begin at position p set to the rightmost n bits of y , leaving the
 other bits unchanged.
 */
 
@@ -14,8 +14,8 @@ int main(void)
 
 	unsigned int x, y;
 	int p, n;
-	x = 0b11111111;
-	y = 0b10101000;
+	x = 255; //0b11111111
+	y = 168; //0b10101000
     p = 4;
     n = 2;
 
@@ -27,8 +27,12 @@ int main(void)
 
 int setbits(unsigned x, int p, int n, unsigned y)
 {
-		// mask x          wide enough mask like 11110011    last n bits from y shifted to p like 0000xx00
-	return x     &    (~0 << (p + 1) | ~(~0 << (p - n + 1)))   |   ((~(~0 << n) & y) << (p - n + 1));
+		// mask x
+		// 		& (wide enough mask like 11110011
+		// 		| last n bits from y shifted to p like 0000xx00)
+	return x
+		&    ((~0 << (p + 1) | ~(~0 << (p - n + 1)))
+		|   ((~(~0 << n) & y) << (p - n + 1)));
 }
 
 // print binary

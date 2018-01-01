@@ -29,7 +29,7 @@ struct tnode *talloc(void);
 char *mstrdup(char *s);
 void freemem(struct tnode *p);
 
-int readChars = 6;
+size_t readChars = 6;
 
 /* find groups with similar words */
 int main(int argc, char* argv[])

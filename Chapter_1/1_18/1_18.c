@@ -1,6 +1,6 @@
 /*
 Exercise 1-18. Write a program to remove trailing blanks
-and tabs from each line of input, and to delete entirely 
+and tabs from each line of input, and to delete entirely
 blank lines.
 */
 
@@ -18,7 +18,6 @@ int main(void)
 {
 	int len;	/* current line length */
 	char line[MAXLINE];	/* current input line */
-	char longest[MAXLINE];	/* longest line saved here */
 
 	while ((len = getLine(line, MAXLINE)) > 0)
 	{
@@ -47,7 +46,7 @@ int getLine(char s[], int lim)
 	return i;
 }
 
-/* strips all spaces, tabs and more than one '\n' 
+/* strips all spaces, tabs and more than one '\n'
  from the end of the string */
 int strip(char s[], int len)
 {
@@ -59,7 +58,7 @@ int strip(char s[], int len)
 	for (int i = len-1; i >= 0; i--) {
 		if (s[i] != ' ' && s[i] != '\t')
 		{
-			if (s[i] == '\n') 
+			if (s[i] == '\n')
 			{
 				nlFound = TRUE;
 			} else

@@ -57,7 +57,6 @@ void __mtest(void)
 /* test cases above _mtest _mtest */
 
 
-#define NKEYS (sizeof keytab / sizeof(keytab[0]))
 #define MAXWORD 100
 
 int getword(char *, int);
@@ -67,12 +66,13 @@ int binsearch(char *, struct key *, int);
 int main(void)
 {
     int n;
+    int nkeys = (int) (sizeof keytab / sizeof(keytab[0]));
     char word[MAXWORD];
     while (getword(word, MAXWORD) != EOF)
         if ( (isalpha(word[0])) || (word[0] == '_') || (word[0] == '#') )
-            if ((n = binsearch(word, keytab, NKEYS)) >= 0)
+            if ((n = binsearch(word, keytab, nkeys)) >= 0)
                 keytab[n].count++;
-    for (n = 0; n < NKEYS; n++)
+    for (n = 0; n < nkeys; n++)
         if (keytab[n].count > 0)
             printf("%4d %s\n",
                 keytab[n].count, keytab[n].word);

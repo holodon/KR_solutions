@@ -1,6 +1,10 @@
 /*
-Exercise 1-23. Write a program to remove all comments from a C program. Don't forget to
-handle quoted strings and character constants properly. C comments don't nest.
+Exercise 1-23. Write a program to remove all comments from a C program. Don't
+forget to handle quoted strings and character constants properly. C comments
+don't nest.
+
+- Ignoring the compiler warning about "comments within comments" and unused
+	"test" variable - all this is on purpose.
  */
 
 #include <stdio.h>
@@ -10,8 +14,8 @@ int main(void)
 	// used to test this program against its own source
 	char test[] = "test/* my simple test */";
 
-	int state = 0;		/* states: 
-							0 - none; 
+	int state = 0;		/* states:
+							0 - none;
 
 						single row comment:
 							1 - "/"; 2 - "//"
@@ -67,8 +71,7 @@ int main(void)
 				else if (c == '*') {
 					skipping = 1;
 					state = 3;
-				}
-				else {
+				} else {
 					putchar('/');	// corner case
 					putchar(c);
 					skipping = 0;
@@ -81,25 +84,26 @@ int main(void)
 					putchar('\n');
 					skipping = 0;
 					state = 0;
-				}
-				else
+				} else {
 					;				// or continue skipping
+				}
 				break;
 
 			case 3:					// "/*" state
-				if (c == '*')
+				if (c == '*') {
 					state = 4;
-				else
+				} else {
 					;				// or continue skipping
+				}
 				break;
 
 			case 4:					// "/* .. *"
 				if (c == '/') {		// end of multiline comment
 					skipping = 0;
 					state = 0;
-				}
-				else
+				} else {
 					state = 3;		// or continue skipping
+				}
 				break;
 
 		}

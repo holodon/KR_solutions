@@ -1,6 +1,6 @@
 /*
 Exercise 1-19. Write a function reverse(s) that reverses
-the character string s . Use it to write a program that 
+the character string s . Use it to write a program that
 reverses its input a line at a time.
 */
 
@@ -11,7 +11,7 @@ reverses its input a line at a time.
 void reverse(char s[], char out[], int len);
 int getLine(char s[], int lim);
 
-/* reads the input and reverse the lines one by one 
+/* reads the input and reverse the lines one by one
 	leaving the '\n' at the end */
 int main(void)
 {
@@ -22,7 +22,7 @@ int main(void)
 	while ((len = getLine(s,MAXLINE)) > 0)
 	{
 		reverse(s, out, len);
-		printf("%s");
+		printf("%s", out);
 	}
 
 	return 0;
@@ -43,7 +43,7 @@ void reverse(char s[], char out[], int len) {
 	{
 		out[len - 1] = '\n';
 	}
-	out[len] = '\0'; 
+	out[len] = '\0';
 }
 
 /* read a line, return its length */

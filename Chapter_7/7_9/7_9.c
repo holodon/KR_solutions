@@ -16,7 +16,7 @@ int mm_isupper(char);
 int main(void)
 {
     clock_t start, end;
-    double mtime1, mtime2, mtime3;
+    double mtime1, mtime2;
     int i, res;
 
     start = clock();
@@ -32,6 +32,8 @@ int main(void)
         res = mm_isupper('g');
     end = clock();
     mtime2 = ((double) (end - start)) / CLOCKS_PER_SEC;
+
+    res = res;                              /* suppress warning */
 
     printf("Total time1: %f\n", mtime1);
     printf("Total time2: %f\n", mtime2);

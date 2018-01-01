@@ -1,7 +1,7 @@
 /*
-Exercise 5-17. Add a field-searching capability, so sorting may bee done on 
-fields within lines, each field sorted according to an independent set of 
-options. (The index for this book was sorted with -df for the index category 
+Exercise 5-17. Add a field-searching capability, so sorting may bee done on
+fields within lines, each field sorted according to an independent set of
+options. (The index for this book was sorted with -df for the index category
 and -n for the page numbers.)
 
 **For me it was not clear enough what the authors mean with "field-searching",
@@ -24,7 +24,7 @@ char *lineptr[MAXLINES];            /* pointers to text lines */
 int readlines(char *lineptr[], int nlines, char storage[]);
 void writelines(char *lineptr[], int nlines);
 
-void mqsort(void *lineptr[], int left, int right, 
+void mqsort(void *lineptr[], int left, int right,
     int (*comp)(void *, void *));
 int numcmp(char *, char *);
 int mycmp(char *, char *);
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
     while( --argc > 0 && (((c = (*++argv)[0]) == '-') || (c == '+')) ) {
         if (c == '-' && !isdigit( *(argv[0] + 1) ))
-            while(c = *++argv[0])
+            while ((c = *++argv[0]))
                 switch(c)
                 {
                     case 'd':
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     }
 
     if ((nlines = readlines(lineptr, MAXLINES, storage)) >= 0) {
-        mqsort((void**) lineptr, 0, nlines-1, 
+        mqsort((void**) lineptr, 0, nlines-1,
             (int (*)(void*,void*))(
                 mycmp
                 ));
@@ -165,7 +165,7 @@ void swap(void *v[],int i, int j)
 /* pointer version */
 int mgetline(char *s, int lim)
 {
-    int c, i;
+    int i;
     i = 0;
     while (--lim > 0 && (*s = getchar()) != EOF && *s != '\n') {
         s++;
@@ -224,12 +224,12 @@ int mycmp(char *s1, char *s2)
     i = j = fieldStart;
     do {
         if (dirorder) {
-            while(  i < endpos && 
-                    !isalnum(s1[i]) && 
+            while(  i < endpos &&
+                    !isalnum(s1[i]) &&
                     s1[i] != ' ' && s1[i] != '\0' )
                 i++;
-            while(  j < endpos && 
-                    !isalnum(s2[j]) && 
+            while(  j < endpos &&
+                    !isalnum(s2[j]) &&
                     s2[j] != ' ' && s2[j] != '\0' )
                 j++;
         }

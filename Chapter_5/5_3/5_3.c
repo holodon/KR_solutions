@@ -1,5 +1,5 @@
 /*
-Exercise 5-3. Write a pointer version of the function strcat that we showed 
+Exercise 5-3. Write a pointer version of the function strcat that we showed
 in Chapter 2: strcat(s,t) copies the string t to the end of s .
 */
 
@@ -25,8 +25,9 @@ int main(void)
 /* strcat: concatenate t to end of s; s must be big enough */
 void mstrcat(char *s, char *t)
 {
-    while (*s)          /* find end of s */
+    while (*s)                              /* find end of s */
         s++;
-    while (*s++ = *t++) /* copy t */
+    while ((*s++ = *t++)) {                 /* copy t */
         ;
+    }
 }

@@ -41,7 +41,7 @@ const struct test {
 /* hash lookup table */
 int main(void)
 {
-    int i;
+    size_t i;
 
     /* insert all */
     for (i = 0; i < TESTS; i++)
@@ -124,7 +124,7 @@ struct nlist *install(char *name, char *defn)
         hashtab[hashval] = np;
     } else                                  /* already there */
     free((void *) np->defn);                /*free previous defn */
-    if ((np->defn = strdup(defn)) == NULL)
+    if ((np->defn = mstrdup(defn)) == NULL)
         return NULL;
     return np;
 }

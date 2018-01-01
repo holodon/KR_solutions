@@ -1,7 +1,7 @@
 /*
-Exercise 5-6. Rewrite appropriate programs from earlier chapters and 
-exercises with pointers instead of array indexing. Good possibilities include 
-getline (Chapters 1 and 4), atoi , itoa , and their variants (Chapters 2, 3, 
+Exercise 5-6. Rewrite appropriate programs from earlier chapters and
+exercises with pointers instead of array indexing. Good possibilities include
+getline (Chapters 1 and 4), atoi , itoa , and their variants (Chapters 2, 3,
 and 4), reverse (Chapter 3), and strindex and getop (Chapter 4).
 */
 
@@ -60,7 +60,7 @@ int main(void)
 
     printf("\n===============\n");
     printf("strindex:\n");
-    printf("\tfound '%s' at position %i in '%s'\n", tstr, 
+    printf("\tfound '%s' at position %i in '%s'\n", tstr,
         strindex(sstr, tstr), sstr);
 
     /* getop */
@@ -85,7 +85,7 @@ int main(void)
 /* pointer version */
 int mgetline(char *s, int lim)
 {
-    int c, i;
+    int i;
     i = 0;
     while (--lim > 0 && (*s = getchar()) != EOF && *s != '\n') {
         s++;
@@ -115,9 +115,10 @@ int matoi(char *s)
 /* pointer version */
 int matoi2(char *s)
 {
-    int i, n, sign;
-    for (i = 0; isspace(*s); s++)        /* skip white space */
+    int n, sign;
+    while (isspace(*s++)) {             /* skip white space */
         ;
+    }
 
     sign = (*s == '-') ? -1 : 1;
     if (*s == '+' || *s == '-')         /* skip sign */
@@ -137,11 +138,11 @@ void mitoa(int n, char *s)
     int sign;
     if ((sign = n) < 0)                 /* record sign */
         n = -n;                         /* make n positive */
-    
+
     do {                                /* generate digits in reverse order */
         *ss++ = n % 10 + '0';           /* get next digit */
     } while ((n /= 10) > 0);            /* delete it */
-    
+
     if (sign < 0)
         *ss++ = '-';
     *ss = '\0';
@@ -191,7 +192,7 @@ void ungetch(int);
 /* pointer version */
 int getop(char *s)
 {
-    int i, c;
+    int c;
     while ((*s = c = getch()) == ' ' || c == '\t')
         ;
     *(s + 1) = '\0';

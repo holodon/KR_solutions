@@ -1,6 +1,6 @@
 /*
-Exercise 2-7. Write a function invert(x,p,n) that returns x with the n bits 
-that begin at position p inverted (i.e., 1 changed into 0 and vice versa), 
+Exercise 2-7. Write a function invert(x,p,n) that returns x with the n bits
+that begin at position p inverted (i.e., 1 changed into 0 and vice versa),
 leaving the others unchanged.
 */
 
@@ -15,7 +15,7 @@ int main(void)
 
 	unsigned int x;
 	int p, n;
-	x = 0b01010101;
+	x = 85; // 0b01010101
 	p = 7;
 	n = 3;
 
@@ -25,7 +25,7 @@ int main(void)
     printf("after invert: \n");
 	printBits(sizeof(r), &r);
 
-	return 0;   
+	return 0;
 }
 
 int invert(unsigned x, int p, int n)
@@ -44,7 +44,7 @@ int invert(unsigned x, int p, int n)
     printBits(sizeof(mask), &mask);
     printf("\n");
 
-	return ~(x & mask) ^ ~mask | (x & ~mask);
+	return (~(x & mask) ^ ~mask) | (x & ~mask);
 }
 
 // print binary

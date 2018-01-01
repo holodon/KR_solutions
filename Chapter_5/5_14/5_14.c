@@ -1,5 +1,5 @@
 /*
-Exercise 5-14. Modify the sort program to handle a -r flag, which indicates 
+Exercise 5-14. Modify the sort program to handle a -r flag, which indicates
 sorting in reverse (decreasing) order. Be sure that -r works with -n .
 */
 
@@ -16,7 +16,7 @@ char *lineptr[MAXLINES];            /* pointers to text lines */
 int readlines(char *lineptr[], int nlines, char storage[]);
 void writelines(char *lineptr[], int nlines);
 
-void mqsort(void *lineptr[], int left, int right, 
+void mqsort(void *lineptr[], int left, int right,
     int (*comp)(void *, void *));
 int numcmp(char *, char *);
 
@@ -32,8 +32,8 @@ int main(int argc, char *argv[])
     // check arguments, set flags
     char **args = argv;
     int c;
-    while(--argc > 0 && (*++args)[0] == '-')
-        while(c = *++args[0])
+    while (--argc > 0 && (*++args)[0] == '-')
+        while ((c = *++args[0]))
             switch(c)
             {
                 case 'r':
@@ -54,8 +54,12 @@ int main(int argc, char *argv[])
     }
 
     if ((nlines = readlines(lineptr, MAXLINES, storage)) >= 0) {
-        mqsort((void**) lineptr, 0, nlines-1,
-            (int (*)(void*,void*))(numeric ? numcmp : strcmp));
+        mqsort(
+                (void**) lineptr, 0, nlines-1,
+                numeric
+                    ? (int (*)(void*,void*)) numcmp
+                    : (int (*)(void*,void*)) strcmp
+                );
         writelines(lineptr, nlines);
         return 0;
     } else {
@@ -130,7 +134,7 @@ void swap(void *v[],int i, int j)
 /* pointer version */
 int mgetline(char *s, int lim)
 {
-    int c, i;
+    int i;
     i = 0;
     while (--lim > 0 && (*s = getchar()) != EOF && *s != '\n') {
         s++;

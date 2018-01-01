@@ -1,8 +1,8 @@
 /*
-Exercise 1-24. Write a program to check a C program for rudimentary syntax errors like
-unmatched parentheses, brackets and braces. Don't forget about quotes, both single and
-double, escape sequences, and comments. (This program is hard if you do it in full
-generality.)
+Exercise 1-24. Write a program to check a C program for rudimentary syntax
+errors like unmatched parentheses, brackets and braces. Don't forget about
+quotes, both single and double, escape sequences, and comments. (This program
+is hard if you do it in full generality.)
 
 Build on top of 1_23 - a state machine for skipping quotes and special symbols.
 */
@@ -25,7 +25,7 @@ int col = 0;
 #define lType 2									// type
 #define lNext 3									// next
 
-/* 
+/*
  structure (array as linked list) for the parentheses, brackets and braces like:
 	{line, col, type, next},
 	{line, col, type, next},
@@ -46,7 +46,7 @@ int main(void)
 	}
 
 
-	int state = 0;		/* states: 
+	int state = 0;		/* states:
 							0 - none;
 
 						single row comment:
@@ -109,12 +109,10 @@ int main(void)
 				if (c == '/') {
 					skipping = 1;
 					state = 2;
-				}
-				else if (c == '*') {
+				} else if (c == '*') {
 					skipping = 1;
 					state = 3;
-				}
-				else {
+				} else {
 					filLineList('/');			// corner case
 					filLineList(c);
 					skipping = 0;
@@ -127,25 +125,26 @@ int main(void)
 					filLineList('\n');
 					skipping = 0;
 					state = 0;
-				}
-				else
+				} else {
 					;							// or continue skipping
+				}
 				break;
 
 			case 3:								// "/*" state
-				if (c == '*')
+				if (c == '*') {
 					state = 4;
-				else
+				} else {
 					;							// or continue skipping
+				}
 				break;
 
 			case 4:								// "/* .. *"
 				if (c == '/') {					// end of multiline comment
 					skipping = 0;
 					state = 0;
-				}
-				else
+				} else {
 					state = 3;					// or continue skipping
+				}
 				break;
 
 		}
@@ -159,7 +158,7 @@ int main(void)
 }
 
 /*
-	This function receives each char which is not a special character, or not in a 
+	This function receives each char which is not a special character, or not in a
 	quote. Then it fills the array "list" with every parentheses, brackets and braces
 	found, in the correct sequence.
 */
@@ -189,7 +188,7 @@ void parseList()
 		return;
 
 	if (pos == 1) {								// list with only one element
-		printf("Unmatched %c at line %d col %d\n", 
+		printf("Unmatched %c at line %d col %d\n",
 			list[0][lType], list[0][lLine], list[0][lCol]);
 		return;
 	}
@@ -203,7 +202,7 @@ void parseList()
 	do {
 		if ( 	(list [pos][lType] == '(' && list [list[pos][lNext]] [lType] == ')') ||
 				(list [pos][lType] == '[' && list [list[pos][lNext]] [lType] == ']') ||
-				(list [pos][lType] == '{' && list [list[pos][lNext]] [lType] == '}') ) 
+				(list [pos][lType] == '{' && list [list[pos][lNext]] [lType] == '}') )
 		{
 
 			change =1;
@@ -220,7 +219,7 @@ void parseList()
 			list [last][lNext] = list [list[pos][lNext]] [lNext];
 		}
 
-		last = pos;								/* save the current (last) position 
+		last = pos;								/* save the current (last) position
 												 and advance */
 
 		if (list [pos][lNext] == -1) {			// end of list reached - start over
@@ -231,14 +230,14 @@ void parseList()
 			else
 				change = 0;
 		} else
-			pos = list[pos][lNext];		
+			pos = list[pos][lNext];
 
 	} while (!done);
 
 												// print all errors
 	pos = head;
 	while (1) {
-		printf("Unmatched %c at line %d col %d\n", 
+		printf("Unmatched %c at line %d col %d\n",
 			list[pos][lType], list[pos][lLine], list[pos][lCol]);
 		if (list [pos] [lNext] == -1) {
 			break;

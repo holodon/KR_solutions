@@ -13,18 +13,20 @@ void *mcalloc(size_t, size_t);
 int main(void)
 {
     long *pt, *tmp;
-    int i, c;
+    int i;
 
 
-    if ((pt = mcalloc(MAX, sizeof(long))) == NULL)
+    if ((pt = (long *) mcalloc(MAX, sizeof(long))) == NULL)
         return -1;                          /* memory error */
 
     printf("result from mcalloc:\n");
     printf("\t   adress    value\n");
     printf("\t-------------------\n");
     tmp = pt;
-    for (i = 0; i < MAX; i++)
-        printf("\t%10p: %08ld\n", tmp, *tmp++);
+    for (i = 0; i < MAX; i++) {
+        printf("\t%10p: %08ld\n", (void *) tmp, *tmp);
+        tmp++;
+    }
 
     free(pt);
 

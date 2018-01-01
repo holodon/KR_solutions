@@ -17,7 +17,6 @@ int minscanf(char *, ...);
 int main(void)
 {
     int day, month, year;
-    char monthname[20];
     int res = 0, ln = 0;
 
     while (res != EOF) {

@@ -41,7 +41,7 @@ void fsize(char *name)
         fprintf(stderr, "fsize: can't access %s\n", name);
         return;
     }
-    if ((stbuf.st_mode & S_IFMT) == S_IFDIR)
+    if (S_ISDIR(stbuf.st_mode))
         dirwalk(name, fsize);
     printf("%6o  %5ld %10ld %s\n", stbuf.st_mode, stbuf.st_ino,
         stbuf.st_size, name);

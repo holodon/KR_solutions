@@ -1,5 +1,5 @@
 /*
-Exercise 2-8. Write a function rightrot(x,n) that returns the value of the 
+Exercise 2-8. Write a function rightrot(x,n) that returns the value of the
 integer x rotated to the right by n positions.
 */
 
@@ -12,7 +12,7 @@ void printBits(size_t const size, void const * const ptr);
 int main(void)
 {
 	unsigned int x;
-	x = 0b1100111011001110;
+	x = 52942; //0b1100111011001110
 	int n;
 	n = 6;
 

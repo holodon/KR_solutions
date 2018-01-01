@@ -1,6 +1,6 @@
 /*
-Exercise 3-6. Write a version of itoa that accepts three arguments instead of 
-two. The third argument is a minimum field width; the converted number must 
+Exercise 3-6. Write a version of itoa that accepts three arguments instead of
+two. The third argument is a minimum field width; the converted number must
 be padded with blanks on the left if necessary to make it wide enough.
 
 implementation without 'reverse'
@@ -34,8 +34,7 @@ int main(void)
 
 void itoa2(int n, char s[], int l)
 {
-    int i, k, minus;
-    i = 0;
+    int k, minus;
     minus = 0;
 
     k = nsize(n);

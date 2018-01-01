@@ -1,5 +1,5 @@
 /*
-Exercise 1-14. Write a program to print a histogram of the 
+Exercise 1-14. Write a program to print a histogram of the
 frequencies of different characters in its input.
 */
 
@@ -81,7 +81,6 @@ int main(void) {
 }
 
 void show(int arr[], int size, int shift) {
-	int buff;
 	int empty = 1;
 
 	for (int i = 0; i < size; i++) {

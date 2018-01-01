@@ -6,3 +6,6 @@
 - All solutions are based only on the already learned stuff in the current/previous chapters;
 - Every file can compile and run with no special dependencies (except some standard library headers);
 - Contributions/bug fixes/better solutions are of course welcome.
+
+- All compiled with: 
+*gcc -g -std=c99 -Wall -Wextra -pedantic-errors prog.c*

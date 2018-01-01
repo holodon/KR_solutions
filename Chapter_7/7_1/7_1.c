@@ -10,6 +10,7 @@ to upper, depending on the name it is invoked with, as found in argv[0] .
 /* lower: convert input to lower case*/
 int main(int argc, char *argv[])
 {
+    argc = argc;
     int to_lower = (strstr(argv[0], "tolower") != NULL) ? 1:0;
 
     int c;

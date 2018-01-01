@@ -1,6 +1,6 @@
 /*
-Exercise 5-16. Add the -d (``directory order'') option, which makes 
-comparisons only on letters, numbers and blanks. Make sure it works in 
+Exercise 5-16. Add the -d (``directory order'') option, which makes
+comparisons only on letters, numbers and blanks. Make sure it works in
 conjunction with -f .
 */
 
@@ -19,7 +19,7 @@ char *lineptr[MAXLINES];            /* pointers to text lines */
 int readlines(char *lineptr[], int nlines, char storage[]);
 void writelines(char *lineptr[], int nlines);
 
-void mqsort(void *lineptr[], int left, int right, 
+void mqsort(void *lineptr[], int left, int right,
     int (*comp)(void *, void *));
 int numcmp(char *, char *);
 int dircmp(char *, char *);
@@ -38,8 +38,8 @@ int main(int argc, char *argv[])
     // check arguments, set flags
     char **args = argv;
     int c;
-    while(--argc > 0 && (*++args)[0] == '-')
-        while(c = *++args[0])
+    while (--argc > 0 && (*++args)[0] == '-')
+        while ((c = *++args[0]))
             switch(c)
             {
                 case 'd':
@@ -67,15 +67,18 @@ int main(int argc, char *argv[])
 
     if ((nlines = readlines(lineptr, MAXLINES, storage)) >= 0) {
         if (dirorder)
-            mqsort((void**) lineptr, 0, nlines-1, 
+            mqsort((void**) lineptr, 0, nlines-1,
                 (int (*)(void*,void*))(
                     dircmp
                     ));
         else
             mqsort((void**) lineptr, 0, nlines-1,
-                (int (*)(void*,void*))(
-                    numeric ? numcmp : (ignorecase? strcasecmp: strcmp)
-                    ));
+                numeric
+                    ? (int (*)(void*,void*)) numcmp
+                    : ignorecase
+                        ? (int (*)(void*,void*)) strcasecmp
+                        : (int (*)(void*,void*)) strcmp
+                    );
         writelines(lineptr, nlines);
         return 0;
     } else {
@@ -150,7 +153,7 @@ void swap(void *v[],int i, int j)
 /* pointer version */
 int mgetline(char *s, int lim)
 {
-    int c, i;
+    int i;
     i = 0;
     while (--lim > 0 && (*s = getchar()) != EOF && *s != '\n') {
         s++;

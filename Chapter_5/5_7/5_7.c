@@ -1,5 +1,5 @@
 /*
-Exercise 5-7. Rewrite readlines to store lines in an array supplied by main , 
+Exercise 5-7. Rewrite readlines to store lines in an array supplied by main ,
 rather than calling alloc to maintain storage. How much faster is the program?
 */
 
@@ -99,7 +99,7 @@ void swap(char *v[], int i, int j)
 /* pointer version */
 int mgetline(char *s, int lim)
 {
-    int c, i;
+    int i;
     i = 0;
     while (--lim > 0 && (*s = getchar()) != EOF && *s != '\n') {
         s++;

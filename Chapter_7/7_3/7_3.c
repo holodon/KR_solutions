@@ -10,7 +10,7 @@ printf .
 void minprintf(char *, ...);
 
 
-int main(int argc, char *argv[])
+int main(void)
 {
     minprintf("This has to %.12s:\n\
                 \tsome decimal number: %5d,\n\

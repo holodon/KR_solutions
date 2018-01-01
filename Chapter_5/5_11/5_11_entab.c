@@ -1,6 +1,6 @@
 /*
-Exercise 5-11. Modify the program entab and detab (written as exercises in 
-Chapter 1) to accept a list of tab stops as arguments. Use the default tab 
+Exercise 5-11. Modify the program entab and detab (written as exercises in
+Chapter 1) to accept a list of tab stops as arguments. Use the default tab
 settings if there are no arguments.
 
 entab - build upon 1_21
@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     int deftab = 8; // default tab size [0..7]
     int currtab = deftab;
 
-    int c, i;
+    int c;
     int col = 0;    // column counter
     int sp = 0;     // space counter
     int arg = 1;    // argument counter

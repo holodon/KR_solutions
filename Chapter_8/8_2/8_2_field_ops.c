@@ -34,10 +34,6 @@ typedef struct _iobuf {
 
 MFILE _iob[OPEN_MAX];
 
-#define mstdin  (&_iob[0])
-#define mstdout (&_iob[1])
-#define mstderr (&_iob[2])
-
 int _fillbuf(MFILE *);
 
 #define mfileno(p)      ((p)->fd)
@@ -53,13 +49,6 @@ char *prog;                                 /* program name for errors */
 
 /* play with a file using our routines */
 int main(int argc, char *argv[]) {
-
-    MFILE _iob[OPEN_MAX] = {                /* stdin, stdout, stderr */
-        { 0, (char *) 0, (char *) 0, {1, 0, 0, 0, 0}, 0 },
-        { 0, (char *) 0, (char *) 0, {0, 1, 0, 0, 0}, 1 },
-        { 0, (char *) 0, (char *) 0, {0, 1, 1, 0, 0}, 2 }
-    };
-
     prog = argv[0];
 
     if (argc == 1) {

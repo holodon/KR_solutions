@@ -1,5 +1,5 @@
 /*
-Exercise 4-3. Given the basic framework, it's straightforward to extend the 
+Exercise 4-3. Given the basic framework, it's straightforward to extend the
 calculator. Add the modulus (%) operator and provisions for negative numbers.
 */
 
@@ -102,14 +102,15 @@ int getop(char s[])
     if (!isdigit(c) && c != '.' && c != '-')
         return c;       /* not a number */
     i = 0;
-    if (c == '-')       /* '-' followed by number? */
+    if (c == '-') {       /* '-' followed by number? */
         if (!isdigit(s[1] = c = getch())) {
             ungetch(c);
             s[1] = '\0';
             return '-';
-        }
-        else
+        } else {
             i = 1;
+        }
+    }
     if (isdigit(c))     /* collect integer part */
         while (isdigit(s[++i] = c = getch()))
             ;
