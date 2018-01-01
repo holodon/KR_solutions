@@ -5,15 +5,12 @@ Improve these routines so they make more pains with error checking.
 
 - More comments - K&R malloc it is a great piece of software,
     after understanding it.
-- Modified mfree to make sure a pointer cannot be reused, also safe free(NULL)
+- Modified mfree to make sure a pointer cannot be reused and a safe free(NULL)
 - Added "visualization".
-
-- WIP - still not ready
 */
 
 #include <stdio.h>
 #include <unistd.h>
-#include <string.h>
 
 typedef long Align;             /* for alignment to long boundary */
 union header {                  /* block header */
@@ -34,13 +31,16 @@ void _mfree(void **);
 void visualize(const char*);
 size_t getfreem(void);
 
-size_t totmem = 0;              /* total memory requested trough sbrk */
+size_t totmem = 0;              /* total memory in chunks */
 
 static Header base;             /* empty list to get started */
 static Header *freep = NULL;    /* start of free list */
-// #define NALLOC 1024             /* minimum chunks to request */
-#define NALLOC 1                /* for testing */
+// #define NALLOC 1024          /* minimum chunks to request */
+#define NALLOC 1                /*      experimenting */
+#define MAXMEM 2048             /* max memory available (in bytes) */
 #define mfree(p) _mfree((void **)&p)
+
+void *sbrk(__intptr_t incr);
 
 
 int main(void)
@@ -63,11 +63,11 @@ int main(void)
     if ((ps = (char *) mmalloc(dlen * sizeof(char))) == NULL)
         return -1;
 
-    /* claim some doubles */
+    /* claim some long's */
     if ((pd = (long *) mmalloc(ddlen * sizeof(long))) == NULL)
         return -1;
 
-    /* claim some more doubles */
+    /* claim some more long's */
     if ((pdd = (long *) mmalloc(ddlen * 2 * sizeof(long))) == NULL)
         return -1;
 
@@ -88,13 +88,13 @@ int main(void)
     visualize("free(the last char)");
 
     mfree(pdd);
-    visualize("free(lot of doubles)");
+    visualize("free(lot of long's)");
 
     mfree(ps);
     visualize("free(string)");
 
     mfree(pd);
-    visualize("free(less doubles)");
+    visualize("free(less long's)");
 
     mfree(pc);
     visualize("free(first char)");
@@ -106,15 +106,17 @@ int main(void)
     /* check memory condition */
     size_t freemem = getfreem();
     printf("\n");
-    printf("--- Memory claimed  : %ld chunks\n", totmem);
-    printf("    Free memory now : %ld chunks\n", freemem);
+    printf("--- Memory claimed  : %ld chunks (%ld bytes)\n",
+                totmem, totmem * sizeof(Header));
+    printf("    Free memory now : %ld chunks (%ld bytes)\n",
+                freemem, freemem * sizeof(Header));
     if (freep->s.size == totmem)
         printf("    No memory leaks detected.\n");
     else
-        printf("    (!) Leaking memory: %ld chunks.\n",
-                    (totmem - freemem));
-    printf("// Done.\n\n");
+        printf("    (!) Leaking memory: %ld chunks (%ld bytes).\n",
+                    (totmem - freemem), (totmem - freemem) * sizeof(Header));
 
+    printf("// Done.\n\n");
     return 0;
 }
 
@@ -131,7 +133,7 @@ void visualize(const char* msg)
         return;
     }
 
-    if  (freep == freep->s.ptr) {               /* self-pointing list = empty */
+    if  (freep == freep->s.ptr) {           /* self-pointing list = empty */
         printf("\tList is empty\n\n");
         return;
     }
@@ -139,7 +141,7 @@ void visualize(const char* msg)
     printf("  ptr: %10p size: %-3lu -->  ", (void *) freep, freep->s.size);
 
     tmp = freep;                            /* find the start of the list */
-    while (tmp->s.ptr > freep) {           /* traverse the list */
+    while (tmp->s.ptr > freep) {            /* traverse the list */
         tmp = tmp->s.ptr;
         printf("ptr: %10p size: %-3lu -->  ", (void *) tmp, tmp->s.size);
     }
@@ -150,6 +152,9 @@ void visualize(const char* msg)
 /* calculate the total amount of available free memory */
 size_t getfreem(void)
 {
+    if (freep == NULL)
+        return 0;
+
     Header *tmp;
     tmp = freep;
     size_t res = tmp->s.size;
@@ -172,6 +177,12 @@ void *mmalloc(size_t nbytes)
     /* smallest count of Header-sized memory chunks */
     /*  (+1 additional chunk for the Header itself) needed to hold nbytes */
     nunits = (nbytes + sizeof(Header) - 1) / sizeof(Header) + 1;
+
+    /* too much memory requested? */
+    if (((nunits + totmem + getfreem())*sizeof(Header)) > MAXMEM) {
+        printf("Memory limit overflow!\n");
+        return NULL;
+    }
 
     if ((prevp = freep) == NULL) {          /* no free list yet */
         /* set the list to point to itself */
@@ -242,6 +253,11 @@ void _mfree(void **ap)
 
     Header *bp, *p;
     bp = (Header *)*ap - 1;                 /* point to block header */
+
+    if (bp->s.size == 0 || bp->s.size > totmem) {
+        printf("_mfree: impossible value for size\n");
+        return;
+    }
 
     /* the free space is only marked as free, but 'ap' still points to it */
     /* to avoid reusing this address and corrupt our structure set it to '\0' */
